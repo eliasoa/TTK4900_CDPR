@@ -1,11 +1,7 @@
-function serialPortsStruct = initSerialPorts()
-%% Set up ASCII communications
+function serialPortsStruct = initSerialPorts(baudrate, timeout)
 % Get the number of motor controllers connected and their COM ports
 motorDrivers = getNumberOfAxisAndCOMPortNumber();
 numberOfDrivers = size(motorDrivers, 1);
-
-baudrate = 115200;
-timeout = 1;
 
 % Initialize a structure and a cell array for storing serial port objects
 serialPortsStruct = struct();

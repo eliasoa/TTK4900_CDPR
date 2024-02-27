@@ -15,7 +15,9 @@ folderPath = fullfile(currentDir, folderName);
 addpath(folderPath);
 
 %% Set up ASCII communications
-ODriveStruct = initSerialPorts();
+baudrate = 115200;
+timeout = 1;
+ODriveStruct = initSerialPorts(baudrate, timeout);
 
 %% Axis state
 % Assuming you have the structure serialPortsStruct with dynamic field names
