@@ -1,6 +1,9 @@
-function axis = getNumberOfAxis()
-% Returns a vector containg the number of motor controllers connected to
-% the pc. Assuming all USB Serial Devices are motor controllers
+function info = getNumberOfAxisAndCOMPortNumber()
+% Returns a vector containg the ODrive number of motor controllers connected to
+% the pc and the number of their respective COM port. 
+% Assuming all USB Serial Devices are motor controllers, and that the
+% lowest COM port corresponds to ODrive 0 and so on
+
 devices = IDSerialComs();
 
 % Initialize an array to hold the results
@@ -19,15 +22,12 @@ end
 
 % Generate a list from 0 to one less than the number of USB Serial Devices
 axis = 0:(usbDeviceCount - 1);
+% Extract COM port number from usbDevices
+comPort = usbDevices(:,2);
+% Generate the vector containg ODrive number id and its respective COM port
+info = [axis', cell2mat(comPort)];
 
-% % Display the results
-% disp('USB Serial Devices and their numbers:');
-% disp(usbDevices);
-% 
-% 
-% % Display the list
-% disp('List from 0 to one less than the number of USB Serial Devices:');
-% disp(deviceList);
+
 
 
 function devices = IDSerialComs()
