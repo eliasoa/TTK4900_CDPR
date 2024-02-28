@@ -13,7 +13,11 @@ usbDevices = {};
 usbDeviceCount = 0;
 
 for i = 1:size(devices, 1)
-    if ischar(devices{i, 1}) && strcmp(devices{i, 1}, 'USB Serial Device')
+    if ischar(devices{i, 1}) && strcmp(devices{i, 1}, 'USB Serial Device') % Engelsk
+        % Add the device and its number to the results array
+        usbDevices(end+1, :) = {devices{i, 1}, devices{i, 2}};
+        usbDeviceCount = usbDeviceCount + 1;
+    elseif ischar(devices{i, 1}) && strcmp(devices{i, 1}, 'Seriell USB-enhet') % Norsk
         % Add the device and its number to the results array
         usbDevices(end+1, :) = {devices{i, 1}, devices{i, 2}};
         usbDeviceCount = usbDeviceCount + 1;

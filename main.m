@@ -14,7 +14,7 @@ folderPath = fullfile(currentDir, folderName);
 % Add the folder to the MATLAB path
 addpath(folderPath);
 
-%% Set up ASCII communications
+%% Set up ASCII communication
 baudrate = 115200;
 timeout = 1;
 ODriveStruct = initSerialPorts(baudrate, timeout);
