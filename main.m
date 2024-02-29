@@ -61,7 +61,10 @@ while true
                 clc
                 disp("Testing mode")
                 activeErrors = getDriverStatus(ODriveStruct,ODriveEnums.Error);
-                
+                stopFlag = handleErrors(ODriveStruct,activeErrors);
+                if stopFlag
+                    break
+                end
             case 3
                 clc
                 disp("Bounce my ballz mode")
