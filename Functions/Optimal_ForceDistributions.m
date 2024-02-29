@@ -21,11 +21,11 @@ flag = 0;
 
 % Calculate the kernel h of A^T
 m = length(A);
-A_t = A;
+A_t = A';
 [~, ~, V] = svd(A_t);
 h = V(:, end);
 
-wp = m_p*9.81;
+wp = [0:-m_p*9.81;0];
 w = wp-w_c;
 
 % 

@@ -1,35 +1,49 @@
 % FROM CHATGPT og mæggærn
-function arrowKeyDemo_chatGPT(device)
+function arrowKeyDemo_chatGPT_with_Workspace(device)
+
+    %%%%%%%%%%%%%% TEST %%%%%%%%%%%%%%
+    f_min = 10;
+    f_max = 100;
+    f_ref = 50;
+    w = [0;-0.2*9.81;0];
+    res = 100;
+    colorW = "red";
+    MP_len_x = 0.15;
+    MP_len_y = 0.02;
+    F_len_x = 1.4;
+    F_len_y = 1.0;
+    [a, b,~,m_p,~] = initRobotSIM(MP_len_x, MP_len_y, F_len_x, F_len_y, "triangle");
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     
-    load("ODriveEnums.mat")
+    % load("ODriveEnums.mat")
     % Initialize variables
     x   = 0;                % Desired x-position
     y   = 0;                % Desired y-position
     phi = 0;                % Desired phi-angle [radians]  
     escapePressed = false;  % Initialize termination button (Press Esc to )
 
-    L               = 2.0;      % Length of platform
-    posIncrement    = 0.5;      % Position Increment each arrow click
-    angleIncrement  = 2;        % Angle increment each arrow click
-    xRange          = 20;       % Width of frame
-    yRange          = 20;       % Height of frame
-
+    
+    L               = MP_len_x;
+    posIncrement    = 0.1;
+    angleIncrement  = 2;
 
     % Plot initial point
     figure;
-    plot(x, y, 'o'); 
+    TranslationWorkspace_V2(phi,a,b,m_p, f_min,f_max, f_ref, w, res, colorW)
     hold on;
-    plot([x x+0.5*L*cosd(phi)], [y y+0.5*L*sind(phi)])
-    plot([x x-0.5*L*cosd(phi)], [y y-0.5*L*sind(phi)])
+    plot(x, y, 'o'); 
+    plot([x x+0.5*L*cos(phi)], [y y+0.5*L*sin(phi)])
+    plot([x x-0.5*L*cos(phi)], [y y-0.5*L*sin(phi)])
     hold off;
 
     title('Arrow Key Demo');
-    xlim([-xRange/2, xRange/2])
-    ylim([-yRange/2, yRange/2])
+    xlim([-F_len_x/2, F_len_x/2])
+    ylim([-F_len_y/2, F_len_y/2])
     grid on;
     
     % Set motor in drive state 
-    setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, device)
+    % setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, device)
 
     % Wait for arrow key press
     while escapePressed == false
@@ -59,14 +73,15 @@ function arrowKeyDemo_chatGPT(device)
             
             % Update the plot
             clf;
-            plot(x, y, 'o'); 
+            TranslationWorkspace_V2(phi,a,b,m_p, f_min,f_max, f_ref, w, res, colorW)
             hold on;
+            plot(x, y, 'o'); 
             plot([x x+0.5*L*cos(phi)], [y y+0.5*L*sin(phi)])
             plot([x x-0.5*L*cos(phi)], [y y-0.5*L*sin(phi)])
             hold off;
             title('Arrow Key Demo');
-            xlim([-xRange/2, xRange/2])
-            ylim([-yRange/2, yRange/2])
+            xlim([-F_len_x/2, F_len_x/2])
+            ylim([-F_len_y/2, F_len_y/2])
             grid on;
 
             % Robot Control
@@ -82,7 +97,7 @@ function arrowKeyDemo_chatGPT(device)
             % setMotorTorque(t4, DEVICE4)
 
             % % TEST
-            setMotorPosition(x, 2, 0.5, device)
+            % setMotorPosition(x, 2, 0.5, device)
 
         end
     end
