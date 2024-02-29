@@ -1,5 +1,5 @@
 %% Preamble
-close 
+close
 clear
 %% Add folders with functions to path
 % Name of the folder to add
@@ -19,17 +19,58 @@ baudrate = 115200;
 timeout = 1;
 ODriveStruct = initSerialPorts(baudrate, timeout);
 
+%% Generate enums
+init_ODriveEnums;
+
 %% Axis state
 % Assuming you have the structure serialPortsStruct with dynamic field names
 
 % % Get all field names in the structure
 % fieldNames = fieldnames(serialPortsStruct);
-% 
+%
 % % Iterate over each field in the structure
 % for k = 1:length(fieldNames)
 %     fieldName = fieldNames{k}; % Current field name as a string
 %     currentSerialPort = serialPortsStruct.(fieldName); % Access the current serial port using dynamic field names
-% 
+%
 %     % Now you can use currentSerialPort as needed
 %     setAxisState(1,currentSerialPort);
 % end
+%% Main program
+while true
+    userInput = input('Enter a number or type "exit" to stop: ', 's'); % 's' for string input
+    % userInput = '2';
+    if strcmp(userInput, 'exit')
+        clc
+        disp('Exiting...');
+        break; % Exit the loop
+    elseif all(isstrprop(userInput, 'digit')) % Check if all characters are digits
+        number = str2double(userInput); % Convert to number
+        disp(['You entered the number: ', num2str(number)]);
+
+        % Switch-case structure to handle different numeric inputs
+        switch number
+            case 1
+                clc
+                disp("Move with cursor mode")
+                disp("Press Esc to exit")
+                arrowKeyDemo_chatGPT(ODriveStruct.ODrive0)
+                clc
+            
+            case 2
+                clc
+                disp("Testing mode")
+                activeErrors = getDriverStatus(ODriveStruct,ODriveEnums.Error);
+                
+            case 3
+                clc
+                disp("Bounce my ballz mode")
+                clc
+            otherwise
+                disp('Input number does not match any function.');
+                clc
+        end
+    else
+        disp('Invalid input. Please enter a number or "exit".');
+    end
+end
