@@ -19,10 +19,13 @@ baudrate = 115200;
 timeout = 1;
 ODriveStruct = initSerialPorts(baudrate, timeout);
 
-%% Generate enums
+%% Generate structs with ODrive modes and error codes (enum from Arduino)
+% Each struct has to be passed as an argument if they need to be used in a
+% function
+
 init_ODriveEnums;
 
-%% Axis state
+%% How to access each driver in the driver struct
 % Assuming you have the structure serialPortsStruct with dynamic field names
 
 % % Get all field names in the structure
@@ -54,17 +57,13 @@ while true
                 clc
                 disp("Move with cursor mode")
                 disp("Press Esc to exit")
-                arrowKeyDemo_chatGPT(ODriveStruct.ODrive0)
+                arrowKeyDemo_chatGPT_with_Workspace(ODriveStruct.ODrive0)
                 clc
-            
+
             case 2
                 clc
                 disp("Testing mode")
-                activeErrors = getDriverStatus(ODriveStruct,ODriveEnums.Error);
-                stopFlag = handleErrors(ODriveStruct,activeErrors);
-                if stopFlag
-                    break
-                end
+                errorCheckAndHandling(ODriveStruct, ODriveError)
             case 3
                 clc
                 disp("Bounce my ballz mode")

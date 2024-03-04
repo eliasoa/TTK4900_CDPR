@@ -103,5 +103,6 @@ function arrowKeyDemo_chatGPT_with_Workspace(device)
     end
     % Terminate arrowkeyDemo
     close all
-    setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, device)
+    % % NEED TO SET ALL STATES CONTROLLER STATES TO IDLE
+    % setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, device)
 end
