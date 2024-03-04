@@ -38,7 +38,7 @@ for k = 1:length(ODrives)
                     stopFlag = false; % Errors cleared, no need to stop
 
                 case 'n'
-                    disp("Errors not cleared, stopping program");
+                    disp("Errors not cleared by user, stopping program");
                     stopFlag = true;
                     return; % Early return as user chose not to clear errors
 

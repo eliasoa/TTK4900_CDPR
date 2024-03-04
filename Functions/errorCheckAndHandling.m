@@ -7,8 +7,10 @@ ODrives = fieldnames(ODriveStruct);
 while true
     activeErrors = getDriverStatus(ODriveStruct, ODriveError);
     displayErrors(activeErrors);
-    handleErrors(ODriveStruct, activeErrors);
-
+    stopFlag = handleErrors(ODriveStruct, activeErrors);
+    if stopFlag
+        break;
+    end
 
     % Check if errors are cleared
     activeErrors = getDriverStatus(ODriveStruct, ODriveError);
@@ -26,8 +28,6 @@ while true
                 disp("Errors not cleared, fix errors and try again")
             end
         end
-
-
     end
 end
 end

@@ -59,11 +59,10 @@ while true
                 disp("Press Esc to exit")
                 arrowKeyDemo_chatGPT_with_Workspace(ODriveStruct.ODrive0)
                 clc
-
             case 2
                 clc
                 disp("Testing mode")
-                errorCheckAndHandling(ODriveStruct, ODriveError)
+                errorCheckAndHandling(ODriveStruct, ODriveError);
             case 3
                 clc
                 disp("Bounce my ballz mode")
