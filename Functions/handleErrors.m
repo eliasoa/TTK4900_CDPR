@@ -1,5 +1,9 @@
 function stopFlag = handleErrors(ODriveStruct, activeErrors)
-% Function to handle errors for each ODrive
+% handleErrors: Function to handle errors for each ODrive
+%
+% Author: Elias Olsen Almenningen and ChatGPT
+% Date: 04.03.2024
+%
 % Parameters:
 %   ODriveStruct - A struct where each field corresponds to a connected
 %                  ODrive, represented by a serial port object.

@@ -7,5 +7,3 @@ command = "c " + string(motor) + " " + string(torque);
 writeline(device, command)
 
 end
-
-

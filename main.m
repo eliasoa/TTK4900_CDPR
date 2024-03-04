@@ -61,12 +61,17 @@ while true
                 clc
             case 2
                 clc
-                disp("Testing mode")
-                errorCheckAndHandling(ODriveStruct, ODriveError);
+                disp("Path following mode")
+                pathFollowingMode(ODriveStruct, ODriveEnums);
+                
             case 3
                 clc
                 disp("Bounce my ballz mode")
                 clc
+            case 4
+                clc
+                disp("Testing mode")
+                errorCheckAndHandling(ODriveStruct, ODriveError);
             otherwise
                 disp('Input number does not match any function.');
                 clc

@@ -1,6 +1,4 @@
-function setMotorVelocity(velocity, torque_ff, COM_Port,baudrate)
-
-device = serialport(COM_Port, baudrate);
+function setMotorVelocity(velocity, torque_ff, device)
 
 motor = 0;
 command = "v " + string(motor) + " " + string(velocity) + " " + string(torque_ff);
@@ -9,5 +7,3 @@ command = "v " + string(motor) + " " + string(velocity) + " " + string(torque_ff
 writeline(device, command)
 
 end
-
-
