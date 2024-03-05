@@ -57,7 +57,7 @@ while true
                 clc
                 disp("Move with cursor mode")
                 disp("Press Esc to exit")
-                arrowKeyDemo_chatGPT_with_Workspace(ODriveStruct.ODrive0)
+                arrowKey_manual_control(ODriveStruct, ODriveEnums)
                 clc
             case 2
                 clc
