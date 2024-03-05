@@ -1,3 +1,4 @@
+% NOT USED, USE getEncoderFeedback instead
 function getFeedback(serialPort)
 
 motor = 0;

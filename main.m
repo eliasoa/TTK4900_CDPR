@@ -29,12 +29,12 @@ init_ODriveEnums;
 % Assuming you have the structure serialPortsStruct with dynamic field names
 
 % % Get all field names in the structure
-% fieldNames = fieldnames(serialPortsStruct);
+% fieldNames = fieldnames(ODriveStruct);
 %
 % % Iterate over each field in the structure
 % for k = 1:length(fieldNames)
 %     fieldName = fieldNames{k}; % Current field name as a string
-%     currentSerialPort = serialPortsStruct.(fieldName); % Access the current serial port using dynamic field names
+%     currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
 %
 %     % Now you can use currentSerialPort as needed
 %     setAxisState(1,currentSerialPort);
