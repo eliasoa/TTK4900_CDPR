@@ -24,6 +24,7 @@ ODriveStruct = initSerialPorts(baudrate, timeout);
 % function
 
 init_ODriveEnums;
+init_CDPR_Params;
 
 %% How to access each driver in the driver struct
 % Assuming you have the structure serialPortsStruct with dynamic field names
@@ -57,7 +58,7 @@ while true
                 clc
                 disp("Move with cursor mode")
                 disp("Press Esc to exit")
-                arrowKey_manual_control(ODriveStruct, ODriveEnums)
+                arrowKey_manual_control(ODriveStruct, ODriveEnums, CDPR_Params)
                 clc
             case 2
                 clc

@@ -1,11 +1,10 @@
 % FROM CHATGPT og mæggærn
-function arrowKey_manual_control(ODriveStruct, ODriveEnums)
+function arrowKey_manual_control(ODriveStruct, ODriveEnums, CDPR_Params)
 
 % Extract SerialPorts
 
 % Get all field names in the ODrive struct
 fieldNames = fieldnames(ODriveStruct);
-
 
 % Initialize variables
 x   = 0;                % Desired x-position
@@ -53,8 +52,8 @@ end
 
 l0 = [1];
 R = 0.02;
-a = [1;0];
-b = [0;0];
+a = CDPR_Params.SGM.FrameAP;                % Extract Frame Anchor points from struct
+b = CDPR_Params.SGM.BodyAP.RECTANGLE;       % Extract Body Anchor points from struct
 
 % Wait for arrow key press
 while escapePressed == false
@@ -119,7 +118,7 @@ while escapePressed == false
         q = [l-l0;0;0];
 
         % % INSERT MOTOR CONTROLLER (CONTROLLER IS NOT COMPLETED)
-        [t1,t2,t3,t4] = CDPR_controller(q_d, q);
+        [t1,t2,t3,t4] = CDPR_controller(q_d, q, CDPR_Params);
         T = [t1,t2,t3,t4];
 
         % INSERT WRITING TORQUE TO DRIVER (NOT DONE, NEED TO ADD DRIVER COMS TO INPUT)
