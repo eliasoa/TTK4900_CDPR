@@ -1,4 +1,4 @@
-function [t1,t2,t3,t4] = CDPR_controller(q, q_d, CDPR_Params)
+function [t1,t2,t3,t4, f] = CDPR_controller(s, s_d, CDPR_Params)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % [t1,t2,t3,t4] : Commanded/desired motor torques
 % q_d           : 3x1 Vector of Desired states (xd;yd;phid)
@@ -9,9 +9,7 @@ function [t1,t2,t3,t4] = CDPR_controller(q, q_d, CDPR_Params)
 % R             : Scalar Radius of spools
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Define full states
-s   = [q;0;0;0];
-s_d = [q_d;0;0;0];
+
 
 K_r = CDPR_Params.ControlParams.K_r;
 K_f = CDPR_Params.ControlParams.K_f;
@@ -29,8 +27,6 @@ w_d = K_r*s_d-[K_f; K_a]*s - K_d*d_c;
 % TODO: Skal flagget brukes til noe 
 
 %%%%%%%%%%%%%%%%%%% Error Handling? %%%%%%%%%%%%%%%%%%%
-
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

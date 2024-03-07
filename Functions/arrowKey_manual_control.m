@@ -18,6 +18,11 @@ angleIncrement  = 2;        % Angle increment each arrow click
 xRange          = 20;       % Width of frame
 yRange          = 20;       % Height of frame
 
+% Initialize full states
+s           = [q0;dq0;zeros(6,1)];          % States        ( MÅ HENTE INITIAL CONDITIONS FRA ET STED, CDPR_PARAMS???  
+e           = zeros(6,1);
+e_int       = zeros(6,1);
+q_dot_d     = zeros(3,1);    % OBS: DENNE MÅ SIKKERT ENDRES PÅ
 
 % Plot initial point
 figure;
@@ -51,9 +56,13 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 l0 = [1];
-R = 0.02;
+R = CDPR_Params.Gen_Params.SPOOL_RADIUS;    % Extract spool radius from struct
 a = CDPR_Params.SGM.FrameAP;                % Extract Frame Anchor points from struct
 b = CDPR_Params.SGM.BodyAP.RECTANGLE;       % Extract Body Anchor points from struct
+h = CDPR_Params.Gen_Params.SAMPLING_TIME;
+
+l       = zeros(4,1);                                                         % Allocate memory for estimated cable lengths
+l_dot   = zeros(4,1);                                                         % Alloctae memory for estimated rate of change of cable
 
 % Wait for arrow key press
 while escapePressed == false
@@ -94,32 +103,47 @@ while escapePressed == false
         grid on;
 
         % Robot Control
-        q_d = [x;y;phi];    % Desired state
-
+       
         % Estimate Cable Lengths
-        l = zeros(1,1);                                                         % Allocate memory for estimated cable lengths
+       
         for k = 1:length(fieldNames)
             fieldName = fieldNames{k}; % Current field name as a string
             currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
 
             % flush(currentSerialPort)
-            [pos, ~] = getEncoderFeedback(currentSerialPort);                        % Get angular position of encoder
+            [pos, vel] = getEncoderFeedback(currentSerialPort);                        % Get angular position of encoder
 
             if (-1)^(k) == -1                                                   % Determine motorsign (Even or odd, can change this)
                 motorsign = 0;
             else
                 motorsign = 1;
             end
-            l(k) = encoder2cableLen(encoder_zeros(k), pos,l0(k),R, motorsign);  % Estimate cable length
+            l(k)        = encoder2cableLen(encoder_zeros(k), pos,l0(k),R, motorsign);       % Estimate cable length
+            l_dot(k)    = vel*2*pi*R;                                                       % Estimated Rate of change of cable
         end
 
-        % INSERT DIRECT KINEMATICS FROM ESTIMATED CABLE LENGTHS
-        % q = DirectKinematics_V2(a,b,l);
-        q = [l-l0;0;0];
 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % CALCULATE STRUCTURE MATRIX
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        A = ???;
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % CALCULATE PSEUDO INVERSE OF STRUCTURE MATRIX (PASS IT TO CONTROLLER, DONT CALCULATE MULTIPLE TIMES IN ONE RUN)
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        A_pseudo = pinv(A);
+
+        % INSERT DIRECT KINEMATICS FROM ESTIMATED CABLE LENGTHS
+        q           = DirectKinematics_V2(a,b,l);   % Estimated pose
+        q_dot       = -A_pseudo*l_dot;              % Estimated velocity
+        q_d         = [x;y;phi];                    % Desired pose
+
+        % Define Full States
+        s           = [q;q_dot;];                   % Current state
+        s_d         = [q_d;zeros(3,1)];             % Desired state
+        
         % % INSERT MOTOR CONTROLLER (CONTROLLER IS NOT COMPLETED)
-        [t1,t2,t3,t4] = CDPR_controller(q_d, q, CDPR_Params);
-        T = [t1,t2,t3,t4];
+        [t1,t2,t3,t4,f]    = CDPR_controller(s, s_d, CDPR_Params);
+        T                   = [t1,t2,t3,t4];
 
         % INSERT WRITING TORQUE TO DRIVER (NOT DONE, NEED TO ADD DRIVER COMS TO INPUT)
         for k = 1:length(fieldNames)
@@ -128,6 +152,20 @@ while escapePressed == false
             setMotorTorque(T(k), currentSerialPort)
         end
 
+        % Calculate Resultant Forces
+        % wr = calculate_resultant_forces(f, b, q);
+
+        % Forward Euler 
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+        % (KAN HENDE VI MÅ ENDRE DENNE, HØR MED SØLVE)
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+        % s_dot = CDPR_Params.SystemMatrices.A_c_aug*s + CDPR_Params.SystemMatrices.B_c_aug*wr + CDPR_Params.SystemMatrices.d_c_aug + CDPR_Params.SystemMatrices.zeroI*s_d;
+
+        % Update integral states
+        e       = s_d - q;
+        e_int   = e_int + e*CDPR_Params.Gen_Params.SAMPLING_TIME; 
+       
     end
 end
 % Terminate arrowkeyDemo
