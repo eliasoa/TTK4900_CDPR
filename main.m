@@ -73,6 +73,11 @@ while true
                 clc
                 disp("Testing mode")
                 errorCheckAndHandling(ODriveStruct, ODriveError);
+            case 5
+                clc
+                disp("Testing: 2 motors")
+                TestRigg_2_motors(ODriveStruct, ODriveEnums, CDPR_Params)
+                clc
             otherwise
                 disp('Input number does not match any function.');
                 clc
