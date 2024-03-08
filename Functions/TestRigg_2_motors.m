@@ -16,10 +16,15 @@ for k = 1:length(fieldNames)
     setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, currentSerialPort)
     disp("Motor " + string(k) + " Active")
 end
+
+testMode = false;
 while escapePressed == false
     key = waitforbuttonpress;
 
-    writeline(currentSerialPort,"axis0.torque")
+    % if testMode == true
+    % s =
+    % s_d = [0.1;0;0;0;0;0];
+    % CDPR_controller(s,s_d, CDPR_Params)
     % Check if the key press is valid
     if key == 1
         charPressed = get(gcf, 'CurrentCharacter');
@@ -29,46 +34,43 @@ while escapePressed == false
             case 27 % Escape key
                 escapePressed = true;
             case 30 % Up arrow
-                T = [-1;-1]*0.8;
+                % Sine torques
+                torque = 0.2;
+                freq = 100;
+                T1 =  torque*sin(freq*t) - torque;
+                T2 = -torque*sin(freq*t) - torque;
+                T = [T1;T2];
+
+                % Write torques
                 for k = 1:length(fieldNames)
                     fieldName = fieldNames{k}; % Current field name as a string
                     currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
                     setMotorTorque(T(k), currentSerialPort);
-                    disp("Motor " + string(k) + " Idle")
+                    disp("ODrive" + string(k-1) + " Torque set point: " + T(k))
                 end
+                % Update time
+                t = t + h;
             case 31 % Down arrow
-                T = [-1;-1]*0.0;
+                T = [-1;-1]*0.5;
                 for k = 1:length(fieldNames)
                     fieldName = fieldNames{k}; % Current field name as a string
                     currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
                     setMotorTorque(T(k), currentSerialPort);
-                    disp("Motor " + string(k) + " Idle")
+                     disp("ODrive" + string(k-1) + " Torque set point: " + T(k))
                 end
-                
-                % % Sine torques
-                % T1 = 0.2*sin(2*pi*t) - 0.2;
-                % T2 = 0.22*cos(2*pi*t) + 0.04;
-                % T = [0;T2];
-                % 
-                % % Write torques
-                % for k = 1:length(fieldNames)
-                %     fieldName = fieldNames{k}; % Current field name as a string
-                %     currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-                %     setMotorTorque(T(k), currentSerialPort);
-                %     disp("Motor " + string(k) + " Idle")
-                % end
-                % % Update time
-                % t = t + h;
+
+             
         end
     end
-
-
-
 end
+
+
+
 close all;
 for k = 1:length(fieldNames)
     fieldName = fieldNames{k}; % Current field name as a string
     currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
     setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, currentSerialPort)
     disp("Motor " + string(k) + " Idle")
+end
 end

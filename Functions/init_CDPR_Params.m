@@ -38,7 +38,7 @@ d               = 0.01;                     % m
 V               = MP_len_x*MP_len_y*d;                    % m^3
 rho             = 2710;                     % kg/m^3
 mp               = V*rho;                   % kg
-mp               = 0.250;                   % TEMPORARY
+mp               = 0.1;                   % TEMPORARY
 Izz              = 1/12*mp*(MP_len_x^2+MP_len_y^2);       % kg m^2
 dtx = 0.0;                                  % Translational dampening coefficient in the x-direction
 dty = 0.0;                                  % Translational dampening coefficient in the y-direction
@@ -51,11 +51,14 @@ Wp              = mp*[0 -g 0]';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   OBS: LAG DENNE MER DYNAMISK/MINDRE HARDKODA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-a1              = [-F_len_x/2;-F_len_y/2];  
-a2              = [-F_len_x/2;F_len_y/2];
-a3              = [F_len_x/2;F_len_y/2];    
-a4              = [F_len_x/2;-F_len_y/2];  
-a               = [a1 a2 a3 a4];
+% a1              = [-F_len_x/2;-F_len_y/2];  
+% a2              = [-F_len_x/2;F_len_y/2];
+% a3              = [F_len_x/2;F_len_y/2];    
+% a4              = [F_len_x/2;-F_len_y/2];  
+% a               = [a1 a2 a3 a4];
+
+a               = [0.2 -0.2; 0 0]; % 1 DoF test rigg
+b               = [0 0; 0 0]; 
 
 % Cable attachment point PLATFORM
 
@@ -121,7 +124,8 @@ K_a = [diag([-10,-10,-1]) zeros(3,3)];
 % Standard Geometric Model Params
 CDPR_BodyAnchorPoints = struct("RECTANGLE", b_rectangle, ...
                                "TRIANGLE", b_triangle, ...
-                               "TRAPEZOID", b_trapez);
+                               "TRAPEZOID", b_trapez, ...
+                               "TEST", b);
 CDPR_SGM = struct("FrameAP", a, ...
                   "BodyAP", CDPR_BodyAnchorPoints);
 
@@ -140,7 +144,8 @@ CDPR_SystemMatrices = struct("A_c_aug", A_c_aug, ...
 
 % General Parameters
 CDPR_GenParams = struct("SAMPLING_TIME", h, ...
-                        "SPOOL_RADIUS", Rs);
+                        "SPOOL_RADIUS", Rs, ...
+                        "Platform_mass", mp);
 % More?
 
 
