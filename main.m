@@ -66,9 +66,9 @@ while true
                 pathFollowingMode(ODriveStruct, ODriveEnums);
                 
             case 3
-                clc
-                disp("Bounce my ballz mode")
-                clc
+                % disp("Bounce my ballz mode")
+                motorPosTest(ODriveStruct, ODriveEnums);
+                
             case 4
                 clc
                 disp("Testing mode")

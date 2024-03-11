@@ -1,10 +1,13 @@
-function [activeErrors] = getDriverStatus(ODriveStruct, ODriveError)
+function [activeErrors, errorsFound, disarmReasonsFound] = getDriverStatus(ODriveStruct, ODriveError)
 % getDriverStatus: Function that checks the state of all connected ODrives
 % and returns a struct with the active error codes and their respective
-% values, and disarm reasons for each ODrive. It also prints the errors.
+% values, and disarm reasons for each ODrive.
 %
 % Author: Elias Olsen Almenningen and ChatGPT
 % Date: 28.02.2024
+%
+% Versions: 2 11.03.2024 Added more error flags to simplify error checking
+% during program execution
 %
 % Parameters:
 %   ODriveStruct - A struct where each field corresponds to a connected
@@ -17,52 +20,53 @@ function [activeErrors] = getDriverStatus(ODriveStruct, ODriveError)
 %                  device. Each field contains nested structs with the
 %                  names of active errors and disarm reasons along with
 %                  their respective error code values.
-%
-% Usage:
-%   [errors] = getDriverStatus(myODrives, myODriveErrors);
-%   Here, 'myODrives' is an example of ODriveStruct, and 'myODriveErrors'
-%   is an example of ODriveError struct.
+%   errorsFound - A boolean flag indicating if any errors were found.
+%   disarmReasonsFound - A boolean flag indicating if any disarm reasons were found.
+
+%% Initialize flags and structs
+errorsFound = false;
+disarmReasonsFound = false;
+activeErrors = struct();
 
 %% Get all field names in the structure
 fieldNames = fieldnames(ODriveStruct);
-
 errorCommand = 'r axis0.active_errors';
 disarmCommand = 'r axis0.disarm_reason';
-% Extract the field names and corresponding error values
+
+%% Extract the field names and corresponding error values
 errorNames = fieldnames(ODriveError);
 errorValues = struct2array(ODriveError);
 
-% Initialize the activeErrors struct
-activeErrors = struct();
-
-% Iterate over each field in the structure
+%% Iterate over each ODrive
 for k = 1:length(fieldNames)
-    fieldName = fieldNames{k}; % Current field name as a string
-    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+    fieldName = fieldNames{k};
+    currentSerialPort = ODriveStruct.(fieldName);
 
-    % Fetch and store active errors
+    %% Fetch and store active errors
     writeline(currentSerialPort, errorCommand);
-    errorCodes = str2double(readline(currentSerialPort)); % Read error states
-    errors = struct(); % Initialize errors struct for current ODrive
+    errorCodes = str2double(readline(currentSerialPort));
+    errors = struct();
     for i = 1:length(errorValues)
         if bitand(errorCodes, errorValues(i))
             errorName = errorNames{i};
             errors.(errorName) = errorValues(i);
+            errorsFound = true;
         end
     end
 
-    % Fetch and store disarm reason
+    %% Fetch and store disarm reasons
     writeline(currentSerialPort, disarmCommand);
-    disarmCodes = str2double(readline(currentSerialPort)); % Read disarm reason
-    disarmReasons = struct(); % Initialize disarmReasons struct for current ODrive
+    disarmCodes = str2double(readline(currentSerialPort));
+    disarmReasons = struct();
     for i = 1:length(errorValues)
         if bitand(disarmCodes, errorValues(i))
             disarmReasonName = errorNames{i};
             disarmReasons.(disarmReasonName) = errorValues(i);
+            disarmReasonsFound = true;
         end
     end
 
-    % Assign errors and disarm reasons to the current field in activeErrors
+    %% Assign to activeErrors struct
     activeErrors.(fieldName) = struct('Errors', errors, 'DisarmReasons', disarmReasons);
 end
 end

@@ -15,30 +15,24 @@ function errorCheckAndHandling(ODriveStruct, ODriveError)
 ODrives = fieldnames(ODriveStruct);
 
 while true
-    activeErrors = getDriverStatus(ODriveStruct, ODriveError);
+    [activeErrors, errorsFound, disarmReasonsFound] = getDriverStatus(ODriveStruct, ODriveError);
+    if ~errorsFound && ~disarmReasonsFound
+        disp("No errors :)");
+    end
     displayErrors(activeErrors);
     stopFlag = handleErrors(ODriveStruct, activeErrors);
     if stopFlag
         break;
     end
 
+
     % Check if errors are cleared
-    activeErrors = getDriverStatus(ODriveStruct, ODriveError);
-
-    for k = 1:length(ODrives)
-        fieldName = ODrives{k};
-        if isfield(activeErrors, fieldName)
-            errorsStruct = activeErrors.(fieldName).Errors;
-            disarmStruct = activeErrors.(fieldName).DisarmReasons;
-
-            if isempty(fieldnames(errorsStruct)) && isempty(fieldnames(disarmStruct))
-                disp("Errors succsessfully cleared")
-                return;
-            else 
-                disp("Errors not cleared, fix errors and try again")
-            end
-        end
+    [~, errorsFound, disarmReasonsFound] = getDriverStatus(ODriveStruct, ODriveError);
+    if errorsFound || disarmReasonsFound
+        disp("Errors or disarmreasons found, fix them and try again");
+    else
+        disp("Errors cleares sucsessfully :)");
+        break;
     end
 end
 end
-

@@ -1,8 +1,12 @@
 function pos = getMotorPosition(device)
-    command = "r axis0.encoder.pos_estimate\n";
+    command = "r axis0.pos_estimate";
     writeline(device, command);
-
-
-    % Pause??
     pos = readline(device);
 end
+
+
+
+
+
+
+

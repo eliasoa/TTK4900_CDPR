@@ -17,14 +17,24 @@ for k = 1:length(fieldNames)
     disp("Motor " + string(k) + " Active")
 end
 
-testMode = false;
+errorEncountered = false;
 while escapePressed == false
     key = waitforbuttonpress;
 
-    % if testMode == true
-    % s =
-    % s_d = [0.1;0;0;0;0;0];
-    % CDPR_controller(s,s_d, CDPR_Params)
+    % Check if error
+    [~, errorsFound, disarmReasonsFound] = getDriverStatus(ODriveStruct, ODriveEnums.Error);
+    if errorsFound || disarmReasonsFound
+        errorEncountered = true;
+        disp("Error occured, stopping motors")
+        for k = 1:length(fieldNames)
+            fieldName = fieldNames{k}; % Current field name as a string
+            currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+            setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, currentSerialPort)
+            disp("Motor " + string(k) + " Idle")
+        end
+        break
+    end
+
     % Check if the key press is valid
     if key == 1
         charPressed = get(gcf, 'CurrentCharacter');
@@ -35,7 +45,7 @@ while escapePressed == false
                 escapePressed = true;
             case 30 % Up arrow
                 % Sine torques
-                torque = 0.2;
+                torque = 0.5;
                 freq = 100;
                 T1 =  torque*sin(freq*t) - torque;
                 T2 = -torque*sin(freq*t) - torque;
@@ -56,21 +66,21 @@ while escapePressed == false
                     fieldName = fieldNames{k}; % Current field name as a string
                     currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
                     setMotorTorque(T(k), currentSerialPort);
-                     disp("ODrive" + string(k-1) + " Torque set point: " + T(k))
+                    disp("ODrive" + string(k-1) + " Torque set point: " + T(k))
                 end
 
-             
+
         end
     end
 end
 
-
-
 close all;
-for k = 1:length(fieldNames)
-    fieldName = fieldNames{k}; % Current field name as a string
-    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-    setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, currentSerialPort)
-    disp("Motor " + string(k) + " Idle")
+if~errorEncountered
+    for k = 1:length(fieldNames)
+        fieldName = fieldNames{k}; % Current field name as a string
+        currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+        setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, currentSerialPort)
+        disp("Motor " + string(k) + " Idle")
+    end
 end
 end
