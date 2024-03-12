@@ -20,7 +20,7 @@ saveConfig(device)
 
 % Calibrate Encoder Offset (?)
 writeParameter(device, "axis0.requested_state", ODriveEnums.AxisState.AXIS_STATE_ENCODER_OFFSET_CALIBRATION)
-pause()
+pause(5)
 
 % Save new config and reboot
 saveConfig(device)

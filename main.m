@@ -87,6 +87,9 @@ while true
                 clc
                 disp("Testing: 2 motors")
                 TestRigg_2_motors(ODriveStruct, ODriveEnums, CDPR_Params)
+            case 6
+                clc
+                % calibrateMotor(ODriveStruct.ODrive0,ODriveEnums)
                 
             otherwise
                 disp('Input number does not match any function.');
