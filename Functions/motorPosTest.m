@@ -12,12 +12,12 @@ motorPos = [0;0];
 for k = 1:length(fieldNames)
     fieldName = fieldNames{k}; % Current field name as a string
     currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-
     setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, currentSerialPort)
     disp("Motor " + string(k) + " Active")
 end
 
 while true
+    %% If an error occurs, stop motors
     [~, errorsFound, disarmReasonsFound] = getDriverStatus(ODriveStruct, ODriveEnums.Error);
     if errorsFound || disarmReasonsFound
         errorEncountered = true;
@@ -30,6 +30,7 @@ while true
         end
         break
     end
+    %% Get motor position from encoders
     for k = 1:length(fieldNames)
         ODrive = ODriveStruct.(fieldNames{k});
         motorPos(k) = getMotorPosition(ODrive);

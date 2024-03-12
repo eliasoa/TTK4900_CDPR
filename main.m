@@ -62,8 +62,18 @@ while true
                 clc
             case 2
                 clc
-                disp("Path following mode")
-                pathFollowingMode(ODriveStruct, ODriveEnums);
+                % disp("Path following mode")
+                % pathFollowingMode(ODriveStruct, ODriveEnums);
+                fieldNames = fieldnames(ODriveStruct);
+
+                % Iterate over each field in the structure
+                for k = 1:length(fieldNames)
+                    fieldName = fieldNames{k}; % Current field name as a string
+                    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+
+                    % Now you can use currentSerialPort as needed
+                    setEncoderPositions(currentSerialPort);
+                end
                 
             case 3
                 % disp("Bounce my ballz mode")
