@@ -92,12 +92,6 @@ writeParameter(device, "rs485_encoder_group0.config.mode", encoderConfigMode)
 writeParameter(device, "axis0.config.load_encoder", loadEncoder)
 writeParameter(device, "odrv.axis0.config.commutation_encoder", commutationEncoder)
 
-%% Motor Calibration
-
-
-writeParameter(device, "axis0.requested_state", ODriveEnums.AxisState.AXIS_STATE_MOTOR_CALIBRATION) % Calibration state
-% [wait for end of motor beep] , HOW THE FUCK
-pause(10)
 
 
 
