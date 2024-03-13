@@ -4,20 +4,33 @@ userInput = input('Enter position setpoint  [-1, 1]: ', 's'); % 's' for string i
 x_target = str2double(userInput); % Convert to number
 disp(['You entered the setpoint: ', num2str(x_target)]);
 
+escapePressed = false;  % Initialize termination button (Press Esc to )
 errorEncountered = false;
 fieldNames = fieldnames(ODriveStruct);
+
+h = 0.01;
+e_int = 0;
+
 motorPos = [0;0];
 
 
 for k = 1:length(fieldNames)
     fieldName = fieldNames{k}; % Current field name as a string
     currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-
     setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, currentSerialPort)
     disp("Motor " + string(k) + " Active")
 end
 
-while true
+while escapePressed == false
+
+    charPressed = get(gcf, 'CurrentCharacter');
+
+    % Check which arrow key is pressed
+    switch charPressed
+        case 27 % Escape key
+            escapePressed = true;
+    end
+    %% If an error occurs, stop motors
     [~, errorsFound, disarmReasonsFound] = getDriverStatus(ODriveStruct, ODriveEnums.Error);
     if errorsFound || disarmReasonsFound
         errorEncountered = true;
@@ -30,46 +43,59 @@ while true
         end
         break
     end
+    %% Get motor position from encoders
     for k = 1:length(fieldNames)
         ODrive = ODriveStruct.(fieldNames{k});
         motorPos(k) = getMotorPosition(ODrive);
     end
     x_r = motorPos(1);
     x_l = motorPos(2);
-    x_current = (x_r - x_l) / 2;
+    x_current = (x_l - x_r) / 2;
     e = x_target - x_current % Positive error, go right
 
 
     %% Tension logic
     % Given values
-    t_ref = -0.2;
+    t_ref = -0.5;
+    sat_lim = 0.4;
     t_min = -0.1;  % Less tension
-    t_max = -0.3;  % More tension
+    t_max = t_ref - sat_lim;  % More tension
 
     Kp = .5; % Tunable gain
-
+    % Ki = 0;
     % Calculate tension adjustment based on error
-    t = e * Kp;
+    % e_int = e_int + e * h
+    % 
+    % e_tol = 0.1;
+    % if e_int >= e_tol
+    %     e_int = e_tol
+    % elseif e_int <=  -e_tol
+    %     e_int = -e_tol
+    % end
+    
+
+    t = e * Kp %+ e_int * Ki;
 
     % Calculate tension for each motor, ensuring it stays within limits
-    T_left = max(min(t_ref - t, t_min), t_max);
-    T_right = max(min(t_ref + t, t_min), t_max);
+    T_right = max(min(t_ref - t, t_min), t_max)
+    T_left = max(min(t_ref + t, t_min), t_max)
 
     % Tension vector to be sent to motors
-    T = [T_right; T_left]
+    T = [T_right; T_left];
 
     for k = 1:length(fieldNames)
         ODrive = ODriveStruct.(fieldNames{k});
         setMotorTorque(T(k), ODrive);
     end
-    
-    if abs(e) < 0.05
-        pause(3);
-        break;
-    end
+
+    % if abs(e) < 0.01
+    %     pause(3);
+    %     break;
+    % end
 
 
 end
+close all
 
 if~errorEncountered
     for k = 1:length(fieldNames)

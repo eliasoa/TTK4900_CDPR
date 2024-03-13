@@ -142,9 +142,9 @@ while escapePressed == false
         
         % % INSERT MOTOR CONTROLLER (CONTROLLER IS NOT COMPLETED)
         [t1,t2,t3,t4,f]    = CDPR_controller(s, s_d, CDPR_Params);
-        T                   = [t1,t2,t3,t4];
+        T                  = [t1,t2,t3,t4];
 
-        % INSERT WRITING TORQUE TO DRIVER (NOT DONE, NEED TO ADD DRIVER COMS TO INPUT)
+        % Write torque to motor drivers
         for k = 1:length(fieldNames)
             fieldName = fieldNames{k}; % Current field name as a string
             currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
