@@ -18,8 +18,10 @@ pause(5)  % Wait for end of motor beep
 % Save new config and reboot
 saveConfig(device)
 
-% Calibrate Encoder Offset (?) e.AXIS_STATE_ENCODER_OFFSET_CALIBRATION)
-pause()
+% Calibrate Encoder Offset (?)
+writeParameter(device, "axis0.requested_state", ODriveEnums.AxisState.AXIS_STATE_ENCODER_OFFSET_CALIBRATION)
+pause(5)
+
 
 % Save new config and reboot
 saveConfig(device)
