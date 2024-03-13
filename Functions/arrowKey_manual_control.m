@@ -102,7 +102,7 @@ while escapePressed == false
         ylim([-yRange/2, yRange/2])
         grid on;
 
-        % Robot Control
+        
        
         % Estimate Cable Lengths
        
@@ -113,30 +113,29 @@ while escapePressed == false
             % flush(currentSerialPort)
             [pos, vel] = getEncoderFeedback(currentSerialPort);                        % Get angular position of encoder
 
-            if (-1)^(k) == -1                                                   % Determine motorsign (Even or odd, can change this)
+            if (-1)^(k) == -1                                                   % Determine motorsign (Even or odd, can change this)!!!!!!!!!!!!!!!!!!!
                 motorsign = 0;
             else
                 motorsign = 1;
             end
+
             l(k)        = encoder2cableLen(encoder_zeros(k), pos,l0(k),R, motorsign);       % Estimate cable length
-            l_dot(k)    = vel*2*pi*R;                                                       % Estimated Rate of change of cable
+            l_dot(k)    = encoder2cableVel(vel, CDPR_Params);                               % Estimated Rate of change of cable
         end
 
+        %% Robot Control
 
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % CALCULATE STRUCTURE MATRIX
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        A = ???;
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % CALCULATE PSEUDO INVERSE OF STRUCTURE MATRIX (PASS IT TO CONTROLLER, DONT CALCULATE MULTIPLE TIMES IN ONE RUN)
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        A_pseudo = pinv(A);
-
-        % INSERT DIRECT KINEMATICS FROM ESTIMATED CABLE LENGTHS
+        % Calculate current and desired pose of the platform
         q           = DirectKinematics_V2(a,b,l);   % Estimated pose
-        q_dot       = -A_pseudo*l_dot;              % Estimated velocity
         q_d         = [x;y;phi];                    % Desired pose
 
+        % Calculate Structure Matrix
+        A = WrenchMatrix_V2(a,b,q);
+        A_pseudo = pinv(A);
+
+        % Calculate current velocity of the platform 
+        q_dot       = -A_pseudo*l_dot;              % Estimated velocity
+        
         % Define Full States
         s           = [q;q_dot;];                   % Current state
         s_d         = [q_d;zeros(3,1)];             % Desired state
