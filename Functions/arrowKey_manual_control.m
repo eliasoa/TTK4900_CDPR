@@ -37,24 +37,17 @@ xlim([-xRange/2, xRange/2])
 ylim([-yRange/2, yRange/2])
 grid on;
 
-% Get initial encoder positions
-encoder_zeros = zeros(4,1);
 
+% Activate motors
 for k = 1:length(fieldNames)
     fieldName = fieldNames{k}; % Current field name as a string
     currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-
-    [pos,~] = getEncoderFeedback(currentSerialPort);
-    encoder_zeros(k) = pos;
 
     setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, currentSerialPort)
     disp("Motor " + string(k) + " Active")
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%
-% MANGLER L0, R, a, b
-%%%%%%%%%%%%%%%%%%%%%%%%
-
+% Midlertidig 
 l0 = [1];
 R = CDPR_Params.Gen_Params.SPOOL_RADIUS;    % Extract spool radius from struct
 a = CDPR_Params.SGM.FrameAP;                % Extract Frame Anchor points from struct
@@ -66,7 +59,7 @@ l_dot   = zeros(4,1);                                                         % 
 
 % Wait for arrow key press
 while escapePressed == false
-    key = waitforbuttonpress;
+    key = waitforbuttonpress; % Muligens fjerne det 
 
     % Check if the key press is valid
     if key == 1
@@ -104,23 +97,23 @@ while escapePressed == false
 
         
        
-        % Estimate Cable Lengths
+        %% Estimate Cable Lengths
        
         for k = 1:length(fieldNames)
             fieldName = fieldNames{k}; % Current field name as a string
-            currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+            currentSerialPort = ODriveStruct.(fieldName);                       % Access the current serial port using dynamic field names
 
             % flush(currentSerialPort)
-            [pos, vel] = getEncoderFeedback(currentSerialPort);                        % Get angular position of encoder
+            [pos, vel] = getEncoderFeedback(currentSerialPort);                 % Get angular position and velocity from encoder
 
             if (-1)^(k) == -1                                                   % Determine motorsign (Even or odd, can change this)!!!!!!!!!!!!!!!!!!!
-                motorsign = 0;
+                motorsign = -1;
             else
                 motorsign = 1;
             end
 
-            l(k)        = encoder2cableLen(encoder_zeros(k), pos,l0(k),R, motorsign);       % Estimate cable length
-            l_dot(k)    = encoder2cableVel(vel, CDPR_Params);                               % Estimated Rate of change of cable
+            l(k)        = encoder2cableLen(pos,l0(k),R, motorsign);             % Estimate cable length
+            l_dot(k)    = encoder2cableVel(vel, CDPR_Params, motorsign);        % Estimated Rate of change of cable
         end
 
         %% Robot Control
@@ -131,10 +124,11 @@ while escapePressed == false
 
         % Calculate Structure Matrix
         A = WrenchMatrix_V2(a,b,q);
-        A_pseudo = pinv(A);
+        A_t = A';
+        A_t_pseudo = pinv(A_t);
 
         % Calculate current velocity of the platform 
-        q_dot       = -A_pseudo*l_dot;              % Estimated velocity
+        q_dot       = -A_t_pseudo*l_dot;              % Estimated velocity
         
         % Define Full States
         s           = [q;q_dot;];                   % Current state

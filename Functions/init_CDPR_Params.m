@@ -117,6 +117,12 @@ K_f = [180*diag([1,1,1]) 10*diag([1,1,1])];
 K_r = pinv((B_c*K_f-A_c)\B_c);
 K_a = [diag([-10,-10,-1]) zeros(3,3)];
 
+% Motorsign (CHANGE IF NEEDED)
+motorsign1 = 1;
+motorsign2 = 1;
+motorsign3 = -1;
+motorsign4 = -1;
+
 
 
 %% Structs

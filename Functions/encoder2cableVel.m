@@ -1,4 +1,4 @@
-function l_dot = encoder2cableVel(encoderVel, CDPR_Params)
+function l_dot = encoder2cableVel(encoderVel, CDPR_Params, motorsign)
 % Function for calculating rate of change of cable length winded up on a
 % spool from velocity measurement from an encoder. Made by Magnus Grøterud
 %
@@ -11,7 +11,7 @@ function l_dot = encoder2cableVel(encoderVel, CDPR_Params)
 R = CDPR_Params.Gen_Params.SPOOL_RADIUS;
 
 % Convert to radians/second
-theta_dot = encoderVel*2*pi;
+theta_dot = encoderVel*2*pi*motorsign;
 
 % Calculate l_dot
 l_dot = theta_dot*R;
