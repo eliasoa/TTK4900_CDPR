@@ -7,6 +7,8 @@ numberOfDrivers = size(motorDrivers, 1);
 serialPortsStruct = struct();
 serialPortsArray = cell(numberOfDrivers, 1);
 
+%% TODO: FIKS SLIK AT COM 4 alltid er ODrive 0, COM 5 er ODrive 1 osv
+
 for k = 1:numberOfDrivers
     driverName = strcat('ODrive', num2str(motorDrivers(k, 1)));
     driverPort = serialport(strcat('COM', num2str(motorDrivers(k, 2))), baudrate, "Timeout", timeout);

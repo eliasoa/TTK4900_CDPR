@@ -17,6 +17,7 @@ addpath(folderPath);
 %% Set up ASCII communication
 baudrate = 115200;
 timeout = 1;
+%% TODO: FIKS SLIK AT COM 4 alltid er ODrive 0, COM 5 er ODrive 1 osv
 ODriveStruct = initSerialPorts(baudrate, timeout);
 
 %% Generate structs with ODrive modes and error codes (enum from Arduino)
