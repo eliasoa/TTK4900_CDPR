@@ -86,8 +86,8 @@ while true
                 errorCheckAndHandling(ODriveStruct, ODriveError);
             case 5
                 clc
-                disp("Testing: 2 motors")
-                TestRigg_2_motors(ODriveStruct, ODriveEnums, CDPR_Params)
+                disp("Testing: 4 motors")
+                TestRigg_4_motors(ODriveStruct, ODriveEnums, CDPR_Params)
             case 6
                 clc
                 % calibrateMotor(ODriveStruct.ODrive0,ODriveEnums)
