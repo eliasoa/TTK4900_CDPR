@@ -10,7 +10,6 @@ function [t1,t2,t3,t4, f] = CDPR_controller(s, s_d, CDPR_Params)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
 K_r = CDPR_Params.ControlParams.K_r;
 K_f = CDPR_Params.ControlParams.K_f;
 K_a = CDPR_Params.ControlParams.K_a;

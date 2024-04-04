@@ -118,10 +118,12 @@ K_r = pinv((B_c*K_f-A_c)\B_c);
 K_a = [diag([-10,-10,-1]) zeros(3,3)];
 
 % Motorsign (CHANGE IF NEEDED)
+motorsign0 = 1;
 motorsign1 = 1;
-motorsign2 = 1;
+motorsign2 = -1;
 motorsign3 = -1;
-motorsign4 = -1;
+
+motorsigns = [motorsign0;motorsign1;motorsign2;motorsign3];
 
 
 
@@ -151,7 +153,8 @@ CDPR_SystemMatrices = struct("A_c_aug", A_c_aug, ...
 % General Parameters
 CDPR_GenParams = struct("SAMPLING_TIME", h, ...
                         "SPOOL_RADIUS", Rs, ...
-                        "Platform_mass", mp);
+                        "Platform_mass", mp, ...
+                        "MOTOR_SIGNS", motorsigns);
 % More?
 
 

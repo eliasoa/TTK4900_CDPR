@@ -1,19 +1,10 @@
 function TestRigg_4_motors(ODriveStruct, ODriveEnums, CDPR_Params)
 
-
-%% Initialization 
-
-
-% Get all field names in the ODrive struct
-fieldNames = fieldnames(ODriveStruct);
-
-for k = 1:length(fieldNames)
-    fieldName = fieldNames{k}; % Current field name as a string
-    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-
-    setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, currentSerialPort)
-    disp("Motor " + string(k) + " Active")
-end
+%% Parameters
+R           = CDPR_Params.Gen_Params.SPOOL_RADIUS;        % Radius of spool
+a           = CDPR_Params.SGM.FrameAP;                    % Frame Anchor Points
+b           = CDPR_Params.SGM.BodyAP.RECTANGLE;           % Body Anchor Points
+motorsigns  = CDPR_Params.Gen_Params.MOTOR_SIGNS;         % Signs determining positive rotational direction 
 
 %% Initialize variables
 x   = 0;                            % Desired x-position
@@ -26,11 +17,24 @@ posIncrement    = 0.5;              % Position Increment each arrow click
 angleIncrement  = 2;                % Angle increment each arrow click
 
 % Initialize full states
-s           = [q0;dq0;zeros(6,1)];  % States        ( MÅ HENTE INITIAL CONDITIONS FRA ET STED, CDPR_PARAMS???  
-e           = zeros(6,1);
-e_int       = zeros(6,1);
+q0          = [0;0;0];              % Initial Pose
+dq0         = [0;0;0];              % Initial Velocity
+% s           = [q0;dq0;zeros(6,1)];  % State Vector       
+% e           = zeros(6,1);           % Memory Allocation for pose error
+% e_int       = zeros(6,1);           % Memory Allocation for integral of error
+f_prev      = zeros(4,1);           % Memory Allocation for prev cable forces
 
+%% Initialization 
+% Get all field names in the ODrive struct
+fieldNames = fieldnames(ODriveStruct);
 
+for k = 1:length(fieldNames)
+    fieldName = fieldNames{k}; % Current field name as a string
+    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+
+    setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, currentSerialPort)
+    disp("Motor " + string(k) + " Active")
+end
 
 %% Control Loop
 while escapePressed == false && errorEncountered == false
@@ -49,10 +53,10 @@ while escapePressed == false && errorEncountered == false
     end
 
     %% Check Keys and update reference pose
-    key = waitforbuttonpress; % Muligens fjerne denne?? Må oppdatere selv om det ikke kommer knappetrykk... 
-    if key == 1
+    % key = waitforbuttonpress; % Muligens fjerne denne?? Må oppdatere selv om det ikke kommer knappetrykk... 
+    % if key == 1
         charPressed = get(gcf, 'CurrentCharacter');
-
+        
         % Check which arrow key is pressed
         switch charPressed
             case 28 % Left arrow
@@ -70,7 +74,7 @@ while escapePressed == false && errorEncountered == false
             case 'd' % 'd' key
                 phi = phi - deg2rad(angleIncrement);
         end
-    end
+    % end
 
     %% Estimate Cable Lengths
     for k = 1:length(fieldNames)
@@ -79,33 +83,50 @@ while escapePressed == false && errorEncountered == false
 
         % flush(currentSerialPort)
         [pos, vel] = getEncoderFeedback(currentSerialPort);                 % Get angular position and velocity from encoder
-
-        if (-1)^(k) == -1                                                   % Determine motorsign (Even or odd, can change this)!!!!!!!!!!!!!!!!!!!
-            motorsign = -1;
-        else
-            motorsign = 1;
-        end
-
-        l(k)        = encoder2cableLen(pos,l0(k),R, motorsign);             % Estimate cable length
-        l_dot(k)    = encoder2cableVel(vel, CDPR_Params, motorsign);        % Estimated Rate of change of cable
+   
+        l(k)        = encoder2cableLen(pos,l0(k),R, motorsigns(k));             % Estimate cable length
+        l_dot(k)    = encoder2cableVel(vel, CDPR_Params, motorsigns(k));        % Estimated Rate of change of cable
     end
     %% Controller
+    % Calculate current and desired pose of the platform
+    q           = DirectKinematics_V2(a,b,l);   % Measured pose
+    q_d         = [x;y;phi];                    % Desired pose    
 
+    % Calculate Structure Matrix
+    A = WrenchMatrix_V2(a,b,q);
+    A_t = A';
+    A_t_pseudo = pinv(A_t);
 
-       
-
+    % Calculate current velocity of the platform 
+    q_dot       = -A_t_pseudo*l_dot;             % Estimated velocity (Not currently in use)
     
-
-
+    % Calculate Errors
+    e = q-q_d;
     
+    Kp = eye(6);  % lol
+    % K_d = 1;
 
+    % Desired wrench (TESTE KONTROLLER)
+    wc = -Kp*e;
 
+    [f, flag] = Optimal_ForceDistributions(A,w_c,m_p,f_min,f_max,f_ref, f_prev);
+
+    % Assume ideal world
+    
+    T = f*R;
+    
+    % Write torque to motor drivers (YOOOO: CHECK POSITIV REGNING)
+    for k = 1:length(fieldNames)
+        fieldName = fieldNames{k}; % Current field name as a string
+        currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+        setMotorTorque(T(k), currentSerialPort)
+    end
+    
+    % Save previous cable forces
+    f_prev = f;
+    
+    % Update Integral effect (later)
+    
 end
-
-
-
-
-
-
 
 end
