@@ -39,7 +39,8 @@ function A = WrenchMatrix_V2(a,b,q)
 
 
 % Parameters and variables
-m           = lenght(a);                % number of cables 
+m           = length(a);                % number of cables 
+r           = q(1:2);                   % carthesian position of MP
 phi         = q(3);                     % orientation of the platform [rad]
 R           = [ cos(phi) -sin(phi);     % rotation matrix from {i} to {b} [SO3]
                 sin(phi)  cos(phi)];
@@ -57,7 +58,7 @@ end
 
 % Cable Vectors
 for i = 1:m
-    L(:,i) = a(:,i) - q - b_F(:,i);
+    L(:,i) = a(:,i) - r - b_F(:,i);
 end
 % Cable Lengths
 for i = 1:m

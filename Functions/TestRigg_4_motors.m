@@ -5,6 +5,10 @@ R           = CDPR_Params.Gen_Params.SPOOL_RADIUS;        % Radius of spool
 a           = CDPR_Params.SGM.FrameAP;                    % Frame Anchor Points
 b           = CDPR_Params.SGM.BodyAP.RECTANGLE;           % Body Anchor Points
 motorsigns  = CDPR_Params.Gen_Params.MOTOR_SIGNS;         % Signs determining positive rotational direction 
+m_p         = CDPR_Params.Gen_Params.Platform_mass;       % Mass of MP
+f_min = 0.3/R;
+f_max = 0.5/R;
+f_ref = 0.4/R;
 
 %% Initialize variables
 x   = 0;                            % Desired x-position
@@ -19,6 +23,8 @@ angleIncrement  = 2;                % Angle increment each arrow click
 % Initialize full states
 q0          = [0;0;0];              % Initial Pose
 dq0         = [0;0;0];              % Initial Velocity
+l0          = [0.3;0.3;0.3;0.3];
+
 % s           = [q0;dq0;zeros(6,1)];  % State Vector       
 % e           = zeros(6,1);           % Memory Allocation for pose error
 % e_int       = zeros(6,1);           % Memory Allocation for integral of error
@@ -82,7 +88,8 @@ while escapePressed == false && errorEncountered == false
         currentSerialPort = ODriveStruct.(fieldName);                       % Access the current serial port using dynamic field names
 
         % flush(currentSerialPort)
-        [pos, vel] = getEncoderFeedback(currentSerialPort);                 % Get angular position and velocity from encoder
+        pos = getEncoderPosition(currentSerialPort);
+        vel = getEncoderVelocity(currentSerialPort);                 % Get angular position and velocity from encoder
    
         l(k)        = encoder2cableLen(pos,l0(k),R, motorsigns(k));             % Estimate cable length
         l_dot(k)    = encoder2cableVel(vel, CDPR_Params, motorsigns(k));        % Estimated Rate of change of cable
@@ -94,20 +101,20 @@ while escapePressed == false && errorEncountered == false
 
     % Calculate Structure Matrix
     A = WrenchMatrix_V2(a,b,q);
-    A_t = A';
-    A_t_pseudo = pinv(A_t);
+    % A_t = A';
+    % A_t_pseudo = pinv(A_t);
 
     % Calculate current velocity of the platform 
-    q_dot       = -A_t_pseudo*l_dot;             % Estimated velocity (Not currently in use)
+    % q_dot       = -A_t_pseudo*l_dot;             % Estimated velocity (Not currently in use)
     
     % Calculate Errors
     e = q-q_d;
     
-    Kp = eye(6);  % lol
+    Kp = eye(3);  % lol
     % K_d = 1;
 
     % Desired wrench (TESTE KONTROLLER)
-    wc = -Kp*e;
+    w_c = -Kp*e;
 
     [f, flag] = Optimal_ForceDistributions(A,w_c,m_p,f_min,f_max,f_ref, f_prev);
 

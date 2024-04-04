@@ -49,7 +49,7 @@ tau         = 1e-6;                 % Chosen after footnote 3
 mu          = tau*max(diag(A));     % Damping factor eq (3.14)
 nu          = 2;                    % Factor preventing fluctutations in mu
 
-iter_max    = 200;                  % Max number of iterations
+iter_max    = 2000;                  % Max number of iterations
 iter        = 0;                    % Iteration number
 
 %cond1       = false;               % norm_2( h_i ) < e_2 * (norm_2(y_i) + e2)

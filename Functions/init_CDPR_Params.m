@@ -27,18 +27,18 @@ g               = 9.81;                     % m/s^2
 % Mobile Platform parameters
 
 % Lengths of mobile platform
-MP_len_x        = 0.15;                      % [m]
-MP_len_y        = 0.02;                      % [m]
+MP_len_x        = 0.05;                      % [m]
+MP_len_y        = 0.025;                      % [m]
         
 % Dimension of the frame
-F_len_x         = 1.4;                       % [m]                
-F_len_y         = 1;                         % [m]
+F_len_x         = 0.642;                       % [m]                
+F_len_y         = 0.442;                         % [m]
 
 d               = 0.01;                     % m
 V               = MP_len_x*MP_len_y*d;                    % m^3
 rho             = 2710;                     % kg/m^3
 mp               = V*rho;                   % kg
-mp               = 0.1;                   % TEMPORARY
+mp               = 0.05;                    % TEMPORARY
 Izz              = 1/12*mp*(MP_len_x^2+MP_len_y^2);       % kg m^2
 dtx = 0.0;                                  % Translational dampening coefficient in the x-direction
 dty = 0.0;                                  % Translational dampening coefficient in the y-direction
@@ -51,23 +51,31 @@ Wp              = mp*[0 -g 0]';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   OBS: LAG DENNE MER DYNAMISK/MINDRE HARDKODA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% a1              = [-F_len_x/2;-F_len_y/2];  
-% a2              = [-F_len_x/2;F_len_y/2];
-% a3              = [F_len_x/2;F_len_y/2];    
-% a4              = [F_len_x/2;-F_len_y/2];  
-% a               = [a1 a2 a3 a4];
+a1              = [-F_len_x/2 + 0.044;-F_len_y/2 + 0.06];  
+a2              = [-F_len_x/2 + 0.044;F_len_y/2 - 0.025];
+a3              = [F_len_x/2 - 0.045;F_len_y/2 - 0.025];    
+a4              = [F_len_x/2 - 0.043;-F_len_y/2 + 0.06];  
+a               = [a1 a2 a3 a4];
 
-a               = [0.2 -0.2; 0 0]; % 1 DoF test rigg
-b               = [0 0; 0 0]; 
+% a               = [0.2 -0.2; 0 0]; % 1 DoF test rigg
+% b               = [0 0; 0 0]; 
 
 % Cable attachment point PLATFORM
 
-% RECTANGLE
-b1              = [-MP_len_x/2;-MP_len_y/2];  
-b2              = [-MP_len_x/2;MP_len_y/2];   
-b3              = [MP_len_x/2;MP_len_y/2];    
-b4              = [MP_len_x/2;-MP_len_y/2];
-b_rectangle               = [b1 b2 b3 b4];
+% RECTANGLE FOR TESTRIGG4
+b1              = [-MP_len_x/2+0.01;-MP_len_y/2];  
+b2              = [-MP_len_x/2+0.01;MP_len_y/2];   
+b3              = [MP_len_x/2-0.01;MP_len_y/2];    
+b4              = [MP_len_x/2-0.01;-MP_len_y/2];
+b_rectangle     = [b1 b2 b3 b4];
+
+
+% % RECTANGLE
+% b1              = [-MP_len_x/2;-MP_len_y/2];  
+% b2              = [-MP_len_x/2;MP_len_y/2];   
+% b3              = [MP_len_x/2;MP_len_y/2];    
+% b4              = [MP_len_x/2;-MP_len_y/2];
+% b_rectangle               = [b1 b2 b3 b4];
 
 % TRIANGLE
 b1              = [0;-MP_len_y/2];
@@ -133,7 +141,7 @@ motorsigns = [motorsign0;motorsign1;motorsign2;motorsign3];
 CDPR_BodyAnchorPoints = struct("RECTANGLE", b_rectangle, ...
                                "TRIANGLE", b_triangle, ...
                                "TRAPEZOID", b_trapez, ...
-                               "TEST", b);
+                               "TEST", b_rectangle);
 CDPR_SGM = struct("FrameAP", a, ...
                   "BodyAP", CDPR_BodyAnchorPoints);
 
