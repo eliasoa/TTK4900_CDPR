@@ -38,7 +38,7 @@ phi0        = 0;                    % Initial estimate of phi
 y           = [r0;phi0];            % Initial pose
 J           = Jacobian(y,a,b,l);    % Calculate Jacobian of inital pose
 
-epsilon1    = 10e-17;               % Threshold parameter 1, set by user
+epsilon1    = 10e-10; %10e-17;               % Threshold parameter 1, set by user
 epsilon2    = epsilon1;             % Threshold parameter 2, set by user
 
 
@@ -49,7 +49,7 @@ tau         = 1e-6;                 % Chosen after footnote 3
 mu          = tau*max(diag(A));     % Damping factor eq (3.14)
 nu          = 2;                    % Factor preventing fluctutations in mu
 
-iter_max    = 2000;                  % Max number of iterations
+iter_max    = 200;                  % Max number of iterations
 iter        = 0;                    % Iteration number
 
 %cond1       = false;               % norm_2( h_i ) < e_2 * (norm_2(y_i) + e2)
@@ -62,9 +62,9 @@ while ~stop && iter < iter_max
     cond1 = norm(h,2) < epsilon2 * (norm(y,2));
     if cond1                            % If small step size, stop
         stop = true;
-        % disp("Condition 1 is true after ");
-        % disp(iter); 
-        % disp("iterations");
+        disp("Condition 1 is true after ");
+        disp(iter); 
+        disp("iterations");
     else                                % Take step
         y_new = y + h;
         F_new = norm(Phi(a,y_new,b,l))^2;
@@ -78,9 +78,9 @@ while ~stop && iter < iter_max
             cond2 = norm(g,2) < epsilon1; 
             if cond2
                 stop = true;
-                % disp("Condition 2 is true after ");
-                % disp(iter); 
-                % disp("iterations");
+                disp("Condition 2 is true after ");
+                disp(iter); 
+                disp("iterations");
             end
             mu = mu * max(1/3,1-(2*rho-1)^3);
             nu = 2;
