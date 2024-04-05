@@ -28,7 +28,7 @@ g               = 9.81;                     % m/s^2
 
 % Lengths of mobile platform
 MP_len_x        = 0.05;                      % [m]
-MP_len_y        = 0.025;                      % [m]
+MP_len_y        = 0.02;                      % [m]
         
 % Dimension of the frame
 F_len_x         = 0.642;                       % [m]                
@@ -38,7 +38,7 @@ d               = 0.01;                     % m
 V               = MP_len_x*MP_len_y*d;                    % m^3
 rho             = 2710;                     % kg/m^3
 mp               = V*rho;                   % kg
-mp               = 0.05;                    % TEMPORARY
+mp               = 0.1;                    % TEMPORARY
 Izz              = 1/12*mp*(MP_len_x^2+MP_len_y^2);       % kg m^2
 dtx = 0.0;                                  % Translational dampening coefficient in the x-direction
 dty = 0.0;                                  % Translational dampening coefficient in the y-direction
@@ -63,10 +63,10 @@ a               = [a1 a2 a3 a4];
 % Cable attachment point PLATFORM
 
 % RECTANGLE FOR TESTRIGG4
-b1              = [-MP_len_x/2+0.01;-MP_len_y/2];  
-b2              = [-MP_len_x/2+0.01;MP_len_y/2];   
-b3              = [MP_len_x/2-0.01;MP_len_y/2];    
-b4              = [MP_len_x/2-0.01;-MP_len_y/2];
+b1              = [-MP_len_x/2;-MP_len_y/2];  
+b2              = [-MP_len_x/2;MP_len_y/2];   
+b3              = [MP_len_x/2;MP_len_y/2];    
+b4              = [MP_len_x/2;-MP_len_y/2];
 b_rectangle     = [b1 b2 b3 b4];
 
 

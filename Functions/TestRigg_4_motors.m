@@ -6,12 +6,12 @@ a           = CDPR_Params.SGM.FrameAP;                    % Frame Anchor Points
 b           = CDPR_Params.SGM.BodyAP.RECTANGLE;           % Body Anchor Points
 motorsigns  = CDPR_Params.Gen_Params.MOTOR_SIGNS;         % Signs determining positive rotational direction
 m_p         = CDPR_Params.Gen_Params.Platform_mass;       % Mass of MP
-f_min = 0.2/R;
-f_max = 0.4/R;
-f_ref = 0.3/R;
+f_min = 0.5/R;
+f_max = 0.7/R;
+f_ref = 0.6/R;
 
 %% Initialize variables
-x   = 0.06;                        % Desired x-position
+x   = 0.08;                        % Desired x-position
 y   = 0;                            % Desired y-position
 phi = 0;                            % Desired phi-angle [radians]
 escapePressed = false;              % Initialize termination button (Press Esc to )
@@ -23,7 +23,7 @@ angleIncrement  = 2;                % Angle increment each arrow click
 % Initialize full states
 q0          = [0;0;0];              % Initial Pose
 dq0         = [0;0;0];              % Initial Velocity
-l0          = [0.3012;0.3199;0.3191;0.302];
+l0          = [0.2938;0.3132;0.3124;0.2946];
 
 % s           = [q0;dq0;zeros(6,1)];  % State Vector
 % e           = zeros(6,1);           % Memory Allocation for pose error
@@ -86,18 +86,18 @@ while errorEncountered == false
     % Calculate Errors
     e = q-q_d
 
-    Kp = diag([2 1 1]);  % lol
+    Kp = diag([25 25 1]);  % lol
     % K_d = 1;
 
     % Desired wrench (TESTE KONTROLLER)
-    w_c = -Kp*e;
+    w_c = -Kp*e
 
-    [f, flag] = Optimal_ForceDistributions(A,w_c,m_p,f_min,f_max,f_ref, f_prev);
+    [f, flag] = Optimal_ForceDistributions(A,w_c,m_p,f_min,f_max,f_ref, f_prev)
 
     % Assume ideal world
 
     T = f*R;
-    T = T.*motorsigns*(-1);
+    T = T.*motorsigns*(-1)
 
     % Write torque to motor drivers (YOOOO: CHECK POSITIV REGNING)
     for k = 1:length(fieldNames)

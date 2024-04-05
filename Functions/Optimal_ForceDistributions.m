@@ -21,14 +21,14 @@ flag = 0;
 
 %% Calculate the kernel h of A^T
 m = length(A);
-A_t = A';
+A_t = A'
 [~, ~, V] = svd(A_t);
 h = V(:, end);
 A_pseudo = pinv(A_t);       % Pseudo-Inverse of structure matrix
 
 %% Calculate wrench
 wp = [0:-m_p*9.81;0];       % External wrench affecting the platform
-w = wp-w_c;                 % Necessary wrench to generate w_c, while counteracting gravity              
+w = wp - w_c;                 % Necessary wrench to generate w_c, while counteracting gravity              
 
 %% Calculate Feasible Solutions
 fm = 0.5*(f_min*ones(4,1) + f_max*ones(4,1));                   % Medium Feasible Cable Force
@@ -59,24 +59,24 @@ else                                                            % Else, need to 
     lambda_max = min(lambda_h);
     lambda_ref = mean(lambda_r);            
     
-    
-    % FIKS MAGNUS DETTE ER JANK
+    % Calculate preferred cable force
     f = f0 + h*lambda_ref;
+
     % Check if reference cable tension is feasible, else change it
     if min(f) < f_min
         f = f0 + h*lambda_min;
     elseif max(f) > f_max
         f = f0 + h*lambda_max;
     end
-                                                  % If desired step is not ok
-    % Mulig at dette er overflødig
-    f = f0 + h*0.5*(lambda_max + lambda_min);           % Use medium cable force
-    end
-    % DENNE LØSNINGEN MÅ FIKSES
+
+    % If f is still not acceptable
     if (min(f) < f_min) || (max(f) > f_max)             % If the solution is not acceptable
-        f = fm;                                         % No solution, return to center of frame
+        f = f_prev;                                         % No solution, return to center of frame
         flag = 2;                                       % Set flag = 2 to alert
     end
+                                                
+end
+    
     
 end
 
