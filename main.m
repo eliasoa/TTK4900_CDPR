@@ -86,7 +86,7 @@ while true
             case 5
                 clc
                 disp("Testing: 4 motors")
-                TestRigg_4_motors(ODriveStruct, ODriveEnums, CDPR_Params)
+                TestRigg_4_motors_VelControl(ODriveStruct, ODriveEnums, CDPR_Params)
             case 6
                 clc
                 % calibrateMotor(ODriveStruct.ODrive0,ODriveEnums)
