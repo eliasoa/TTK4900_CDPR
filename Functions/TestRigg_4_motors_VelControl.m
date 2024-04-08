@@ -25,6 +25,8 @@ q0          = [0;0;0];              % Initial Pose
 dq0         = [0;0;0];              % Initial Velocity
 l0          = [0.2938;0.3132;0.3124;0.2946];
 
+[~,l0,~] = CDPR_InverseKinematics_V2([0;0;0], a, b)
+
 % s           = [q0;dq0;zeros(6,1)];  % State Vector
 % e           = zeros(6,1);           % Memory Allocation for pose error
 % e_int       = zeros(6,1);           % Memory Allocation for integral of error
