@@ -62,23 +62,59 @@ while true
                 clc
             case 2
                 clc
-                % disp("Path following mode")
-                % pathFollowingMode(ODriveStruct, ODriveEnums);
-                fieldNames = fieldnames(ODriveStruct);
+                disp("Set home position")
+                userInput = input("Ensure that the MP is fastened at the origin with the drill bit. Type y when done: ", 's');
+                if userInput == 'y'
+                    disp("Setting homing tension")
+                    T = [-0.39; -0.39; 0.39; 0.39];
+                    fieldNames = fieldnames(ODriveStruct);
+                    for k = 1:length(fieldNames)
+                        fieldName = fieldNames{k}; % Current field name as a string
+                        currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+                        setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, currentSerialPort)
+                        disp("Motor " + string(k) + " Active")
+                        setMotorTorque(T(k), currentSerialPort)
+                    end
+                    pause(2);
+                    % Set home position
+                    for k = 1:length(fieldNames)
+                        fieldName = fieldNames{k}; % Current field name as a string
+                        currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+                        setEncoderPositions(currentSerialPort);
+                    end
+                    disp("Pause 1 sec")
+                    pause(1);
+                    for k = 1:length(fieldNames)
+                        fieldName = fieldNames{k}; % Current field name as a string
+                        currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+                        setMotorTorque(0, currentSerialPort);
+                        setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, currentSerialPort);
+                        pause(0.4)
+                    end
+                else
+                    disp("Insert homing plug and try again xddddd")
+                end
 
                 % Iterate over each field in the structure
-                for k = 1:length(fieldNames)
-                    fieldName = fieldNames{k}; % Current field name as a string
-                    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+                
 
-                    % Now you can use currentSerialPort as needed
-                    setEncoderPositions(currentSerialPort);
-                end
-                
             case 3
-                % disp("Bounce my ballz mode")
-                motorPosTest(ODriveStruct, ODriveEnums);
-                
+                disp("Check workspace")
+                % motorPosTest(ODriveStruct, ODriveEnums);
+                phi_0 = 0;
+                R           = CDPR_Params.Gen_Params.SPOOL_RADIUS;        % Radius of spool
+                a           = CDPR_Params.SGM.FrameAP;                    % Frame Anchor Points
+                b           = CDPR_Params.SGM.BodyAP.RECTANGLE;           % Body Anchor Points
+                motorsigns  = CDPR_Params.Gen_Params.MOTOR_SIGNS;         % Signs determining positive rotational direction
+                m_p         = CDPR_Params.Gen_Params.Platform_mass;       % Mass of MP
+                f_min = 0.2/R;
+                f_max = 0.6/R;
+                f_ref = 0.4/R;
+                w = [0 -m_p*.81 0]';
+                resolution = 100;
+                color = 'red';
+                TranslationWorkspace_V2(phi_0,a,b,m_p, f_min,f_max, f_ref, w, resolution, color)
+
             case 4
                 clc
                 disp("Testing mode")
@@ -86,11 +122,11 @@ while true
             case 5
                 clc
                 disp("Testing: 4 motors")
-                TestRigg_4_motors_VelControl(ODriveStruct, ODriveEnums, CDPR_Params)
+                TestRigg_4_motors(ODriveStruct, ODriveEnums, CDPR_Params)
             case 6
                 clc
                 % calibrateMotor(ODriveStruct.ODrive0,ODriveEnums)
-                
+
             otherwise
                 disp('Input number does not match any function.');
                 clc

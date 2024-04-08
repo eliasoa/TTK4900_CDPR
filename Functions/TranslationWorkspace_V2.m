@@ -24,7 +24,7 @@ for i=1:X
     for j=1:Y
         pose = [x_grid(i); y_grid(j);phi_0];
         [~,~,A_transpose] = CDPR_InverseKinematics_V2(pose, a, b);
-        [~, flag] = Optimal_ForceDistributions(A_transpose',w,m_p,f_min,f_max, f_ref);
+        [~, flag] = Optimal_ForceDistributions(A_transpose',w,m_p,f_min,f_max, f_ref,[0,0,0,0]');
         if flag == 0
             f_positive(i,j) = 1;
         end

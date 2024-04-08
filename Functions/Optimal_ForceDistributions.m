@@ -14,6 +14,10 @@ function [f, flag] = Optimal_ForceDistributions(A,w_c,m_p,f_min,f_max,f_ref, f_p
 % Flag = 2: No acceptable step length
 %
 % Elias Olsen Almenningen & Magnus Grøterud
+
+if isempty(f_prev)
+    f_prev = [0 0 0 0]';
+end
 %% Kernel Translation V2: return of the dumbfuckery 
 
 % Initialize Flag
@@ -21,14 +25,15 @@ flag = 0;
 
 %% Calculate the kernel h of A^T
 m = length(A);
-A_t = A'
-[~, ~, V] = svd(A_t);
-h = V(:, end);
+A_t = A';
+% [~, ~, V] = svd(A_t);
+% h = V(:, end)
+h = null(A_t);
 A_pseudo = pinv(A_t);       % Pseudo-Inverse of structure matrix
 
 %% Calculate wrench
-wp = [0:-m_p*9.81;0];       % External wrench affecting the platform
-w = wp - w_c;                 % Necessary wrench to generate w_c, while counteracting gravity              
+% wp = [0:-m_p*9.81;0];       % External wrench affecting the platform
+w = w_c;                 % Necessary wrench to generate w_c, while counteracting gravity              
 
 %% Calculate Feasible Solutions
 fm = 0.5*(f_min*ones(4,1) + f_max*ones(4,1));                   % Medium Feasible Cable Force
@@ -57,7 +62,7 @@ else                                                            % Else, need to 
      
     lambda_min = max(lambda_l);
     lambda_max = min(lambda_h);
-    lambda_ref = mean(lambda_r);            
+    lambda_ref = median(lambda_r);            
     
     % Calculate preferred cable force
     f = f0 + h*lambda_ref;
