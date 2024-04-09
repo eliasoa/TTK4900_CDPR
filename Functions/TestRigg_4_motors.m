@@ -109,7 +109,8 @@ while errorEncountered == false
     % Desired wrench (TESTE KONTROLLER)
     w_c = Kp*e %+ Kd*e_dot
 
-    [f, flag] = Optimal_ForceDistributions(A,w_c,m_p,f_min,f_max,f_ref, f_prev)
+    % [f, flag] = Optimal_ForceDistributions(A,w_c,m_p,f_min,f_max,f_ref, f_prev)
+
 
     % Assume ideal world
 
