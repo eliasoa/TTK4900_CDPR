@@ -38,18 +38,18 @@ phi0        = 0;                    % Initial estimate of phi
 y           = [r0;phi0];            % Initial pose
 J           = Jacobian(y,a,b,l);    % Calculate Jacobian of inital pose
 
-epsilon1    = 10e-10; %10e-17;               % Threshold parameter 1, set by user
+epsilon1    = 10e-14; %10e-17;               % Threshold parameter 1, set by user
 epsilon2    = epsilon1;             % Threshold parameter 2, set by user
 
 
 A           = J.'*J;                % Firs A is without + mu*I
 g           = J'*Phi(a,y,b,l);      % 
 
-tau         = 1e-6;                 % Chosen after footnote 3
+tau         = 1e-5; %1e-6;                 % Chosen after footnote 3
 mu          = tau*max(diag(A));     % Damping factor eq (3.14)
 nu          = 2;                    % Factor preventing fluctutations in mu
 
-iter_max    = 200;                  % Max number of iterations
+iter_max    = 300;                  % Max number of iterations
 iter        = 0;                    % Iteration number
 
 %cond1       = false;               % norm_2( h_i ) < e_2 * (norm_2(y_i) + e2)

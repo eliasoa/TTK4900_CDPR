@@ -73,7 +73,9 @@ while true
                         currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
                         setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, currentSerialPort)
                         disp("Motor " + string(k) + " Active")
+                        pause(0.1)
                         setMotorTorque(T(k), currentSerialPort)
+                        pause(0.1)
                     end
                     pause(2);
                     % Set home position
@@ -84,13 +86,13 @@ while true
                     end
                     disp("Pause 1 sec")
                     pause(1);
-                    for k = 1:length(fieldNames)
-                        fieldName = fieldNames{k}; % Current field name as a string
-                        currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-                        setMotorTorque(0, currentSerialPort);
-                        setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, currentSerialPort);
-                        pause(0.4)
-                    end
+                    % for k = 1:length(fieldNames)
+                    %     fieldName = fieldNames{k}; % Current field name as a string
+                    %     currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+                    %     setMotorTorque(0, currentSerialPort);
+                    %     setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, currentSerialPort);
+                    %     pause(0.4)
+                    % end
                 else
                     disp("Insert homing plug and try again xddddd")
                 end

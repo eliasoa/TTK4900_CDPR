@@ -15,9 +15,9 @@ function [f, flag] = Optimal_ForceDistributions(A,w_c,m_p,f_min,f_max,f_ref, f_p
 %
 % Elias Olsen Almenningen & Magnus Grøterud
 
-if isempty(f_prev)
-    f_prev = [0 0 0 0]';
-end
+% if isempty(f_prev)
+%     f_prev = [0 0 0 0]';
+% end
 %% Kernel Translation V2: return of the dumbfuckery 
 
 % Initialize Flag
@@ -32,11 +32,11 @@ h = null(A_t);
 A_pseudo = pinv(A_t);       % Pseudo-Inverse of structure matrix
 
 %% Calculate wrench
-% wp = [0:-m_p*9.81;0];       % External wrench affecting the platform
-w = w_c;                 % Necessary wrench to generate w_c, while counteracting gravity              
+wp = [0;-m_p*9.81;0];       % External wrench affecting the platform
+w = -w_c + wp;                 % Necessary wrench to generate w_c, while counteracting gravity              
 
 %% Calculate Feasible Solutions
-fm = 0.5*(f_min*ones(4,1) + f_max*ones(4,1));                   % Medium Feasible Cable Force
+% fm = 0.5*(f_min*ones(4,1) + f_max*ones(4,1));                   % Medium Feasible Cable Force
 f0 = -(A_pseudo*w);                                             % Arbitrarily Solution on the line
 
 if (min(f0) > 0) && (max(f0) <= f_max) && (min(f0) >= f_min)      % If arbitrarily solution is wrench-feasible
@@ -65,9 +65,9 @@ else                                                            % Else, need to 
     lambda_ref = median(lambda_r);            
     
     % Calculate preferred cable force
-    f = f0 + h*lambda_ref;
+    f = f0 + h*lambda_min;
 
-    % Check if reference cable tension is feasible, else change it
+    % % Check if reference cable tension is feasible, else change it
     if min(f) < f_min
         f = f0 + h*lambda_min;
     elseif max(f) > f_max
