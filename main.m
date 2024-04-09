@@ -54,12 +54,14 @@ while true
 
         % Switch-case structure to handle different numeric inputs
         switch number
+            
             case 1
                 clc
                 disp("Move with cursor mode")
                 disp("Press Esc to exit")
                 arrowKey_manual_control(ODriveStruct, ODriveEnums, CDPR_Params)
                 clc
+
             case 2
                 clc
                 disp("Set home position")
@@ -97,9 +99,6 @@ while true
                     disp("Insert homing plug and try again xddddd")
                 end
 
-                % Iterate over each field in the structure
-                
-
             case 3
                 disp("Check workspace")
                 % motorPosTest(ODriveStruct, ODriveEnums);
@@ -121,13 +120,21 @@ while true
                 clc
                 disp("Testing mode")
                 errorCheckAndHandling(ODriveStruct, ODriveError);
+
             case 5
                 clc
                 disp("Testing: 4 motors")
                 TestRigg_4_motors(ODriveStruct, ODriveEnums, CDPR_Params)
+
             case 6
-                clc
+                disp("Enable enable_dc_bus_voltage_feedback on all ODrives")
                 % calibrateMotor(ODriveStruct.ODrive0,ODriveEnums)
+                fieldNames = fieldnames(ODriveStruct);
+                for k = 1:length(fieldNames)
+                    fieldName = fieldNames{k}; % Current field name as a string
+                    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field name
+                    enableBrakeResistorVoltageFeedback(currentSerialPort);
+                end
 
             otherwise
                 disp('Input number does not match any function.');

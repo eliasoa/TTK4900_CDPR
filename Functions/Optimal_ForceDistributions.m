@@ -62,25 +62,41 @@ else                                                            % Else, need to 
      
     lambda_min = max(lambda_l);
     lambda_max = min(lambda_h);
-    lambda_ref = median(lambda_r);            
-    
-    % Calculate preferred cable force
-    f = f0 + h*lambda_min;
+    lambda_ref = median(lambda_r);      
+    lambda_mid = (lambda_min + lambda_max)/2;
 
-    % % Check if reference cable tension is feasible, else change it
-    if min(f) < f_min
-        f = f0 + h*lambda_min;
-    elseif max(f) > f_max
-        f = f0 + h*lambda_max;
+    % If step sizes are not valid
+    if lambda_min > lambda_max
+        flag = 2;
+        disp("Step sizes are inconsistent. Returning to home pos.")
+        f = f_ref*ones(4,1);
+    else
+        % Calculate preferred cable force
+        f = f0 + h*lambda_ref;
+        % % Check if reference cable tension is feasible, else change it
+        % if min(f) < f_min
+        %     f = f0 + h*lambda_min;
+        % elseif max(f) > f_max
+        %     f = f0 + h*lambda_max;
+
+        % If f is still not acceptable
+        if (min(f) < f_min) || (max(f) > f_max)             % If the solution is not acceptable
+            f = f_prev;                                     % No solution, return to center of frame
+            flag = 3;                                       % Set flag = 2 to alert
+            disp("min(f) < f_min) or (max(f) > f_max")
+            h
+            lambda_min
+            lambda_mid
+            lambda_max
+            f0
+        end
+
     end
 
-    % If f is still not acceptable
-    if (min(f) < f_min) || (max(f) > f_max)             % If the solution is not acceptable
-        f = f_prev;                                         % No solution, return to center of frame
-        flag = 2;                                       % Set flag = 2 to alert
-    end
-                                                
 end
+    
+    
+                                               
     
     
 end

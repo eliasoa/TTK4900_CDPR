@@ -63,10 +63,10 @@ a               = [a1 a2 a3 a4];
 % Cable attachment point PLATFORM
 
 % RECTANGLE FOR TESTRIGG4
-b1              = [-MP_len_x/2;-MP_len_y/2];  
-b2              = [-MP_len_x/2;MP_len_y/2];   
-b3              = [MP_len_x/2;MP_len_y/2];    
-b4              = [MP_len_x/2;-MP_len_y/2];
+b1              = [-30+4.12;-10.24] *1e-3;  
+b2              = [-30+4.36;11.24]  *1e-3;   
+b3              = [30-4.52;11.24]   *1e-3;    
+b4              = [30-4.54;-10.24]  *1e-3;
 b_rectangle     = [b1 b2 b3 b4];
 
 

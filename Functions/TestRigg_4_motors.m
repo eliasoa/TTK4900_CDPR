@@ -7,11 +7,11 @@ b           = CDPR_Params.SGM.BodyAP.RECTANGLE;           % Body Anchor Points
 motorsigns  = CDPR_Params.Gen_Params.MOTOR_SIGNS;         % Signs determining positive rotational direction
 m_p         = CDPR_Params.Gen_Params.Platform_mass;       % Mass of MP
 f_min = 0.1/R;
-f_max = 1/R;
+f_max = 1.5/R;
 f_ref = 0.5/R;
 
 %% Initialize variables
-x   = -0.1;                        % Desired x-position
+x   = 0.08;                        % Desired x-position
 y   = 0;                            % Desired y-position
 phi = 0;                            % Desired phi-angle [radians]
 
@@ -95,13 +95,15 @@ while errorEncountered == false
     % % q_dot       = -A_pseudo*l_dot             % Estimated velocity (Not currently in use)
 
     % Calculate Errors
+    % q(3) = 0;
     e           = q_d - q
     % e_dot       = q_d_dot - q_dot
     % e(3) = 0; %Tihi hax
     % e
 
-    Kp = diag([105 105 10]);  % lol
+    Kp = diag([80 80 1]);  % lol
     Kd = diag([25 25 0]);
+    Ki = diag([10 10 1]);
     % K_d = 1;
 
     % Desired wrench (TESTE KONTROLLER)
@@ -111,7 +113,7 @@ while errorEncountered == false
 
     % Assume ideal world
 
-    T = f*R.*motorsigns*(-1)
+    T = f*R.*motorsigns*(-1) % fordi motorsigns er for endring i kabelendring og ikke rotasjonsretning på torque
     
 
     % Write torque to motor drivers (YOOOO: CHECK POSITIV REGNING)
