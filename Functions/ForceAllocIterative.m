@@ -29,7 +29,7 @@ fMinVec = f_min*ones(4,1);
 fMaxVec = f_max*ones(4,1);
 
 
-w_ref = [3;0;0];
+w_ref = [10;0;0];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Force Allocation Algorithm
@@ -47,8 +47,10 @@ f0 = f_ref;
 % Params
 % sigma   = norm(H,1);
 % lambda  = max(abs(f_max - f0), abs(f0 - f_min));
-c1      = 1; 
-c2      = c1;
+c1      = 0.1;                % Constant enabling adjustments in how fast the cost function increases
+c2      = c1;               % Constant enabling adjustments in how fast the cost function increases
+epsilon = 10^(-3);          % For slack version, not implemented yet.
+
 % delta 
 
 %% Defining the constraints (SYMBOLIC)
@@ -155,9 +157,11 @@ end
 
 % Function for calculating the Hessian of the objective function
 function H_g_f = HessianObjFunc(f, f_min, f_max,f_0, c1,c2,p,alpha)
-H_g_f           = zeros(4,1);          % Memory Allocation
+H_g_f = zeros(4,1);          % Memory Allocation
 
+% Calculating the diagonal of the Hessian
 for i=1:4
+    % Handling division by zero
     if f(i) == f_0
         H_g_f(i) =  c1/(f(i) - f_min)^2 - c2/(f_max - f(i));
     else
@@ -180,6 +184,8 @@ end
 % (Markus Grasmair, Department of Mathematics, 
 % Norwegian University of Science and Technology,
 % Trondheim, Norway)
+%
+% (OBS: Tror ikke denne er helt riktig)
 
 function D_phi_merit = D_MeritFunc(z,grad_g, W, w_ref, d_k)
     f               = z(1:4);
