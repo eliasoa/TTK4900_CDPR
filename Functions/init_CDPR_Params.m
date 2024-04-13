@@ -27,12 +27,12 @@ g               = 9.81;                     % m/s^2
 % Mobile Platform parameters
 
 % Lengths of mobile platform
-MP_len_x        = 0.05;                      % [m]
-MP_len_y        = 0.02;                      % [m]
+MP_len_x        = 0.15;                   % [m]
+MP_len_y        = 0.05;                      % [m]
         
 % Dimension of the frame
-F_len_x         = 0.642;                       % [m]                
-F_len_y         = 0.442;                         % [m]
+F_len_x         = 1.46;                       % [m]                
+F_len_y         = 1;                         % [m]
 
 d               = 0.01;                     % m
 V               = MP_len_x*MP_len_y*d;                    % m^3
@@ -51,10 +51,10 @@ Wp              = mp*[0 -g 0]';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   OBS: LAG DENNE MER DYNAMISK/MINDRE HARDKODA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-a1              = [-F_len_x/2 + 0.044;-F_len_y/2 + 0.06];  
-a2              = [-F_len_x/2 + 0.044;F_len_y/2 - 0.025];
-a3              = [F_len_x/2 - 0.044;F_len_y/2 - 0.025];    
-a4              = [F_len_x/2 - 0.044;-F_len_y/2 + 0.06];  
+a1              = [-F_len_x/2;-F_len_y/2 ];  
+a2              = [-F_len_x/2 ;F_len_y/2 ];
+a3              = [F_len_x/2 ;F_len_y/2];    
+a4              = [F_len_x/2;-F_len_y/2 ];  
 a               = [a1 a2 a3 a4];
 
 % a               = [0.2 -0.2; 0 0]; % 1 DoF test rigg
@@ -62,20 +62,20 @@ a               = [a1 a2 a3 a4];
 
 % Cable attachment point PLATFORM
 
-% RECTANGLE FOR TESTRIGG4
-b1              = [-30+4.12;-10.24] *1e-3;  
-b2              = [-30+4.36;11.24]  *1e-3;   
-b3              = [30-4.52;11.24]   *1e-3;    
-b4              = [30-4.54;-10.24]  *1e-3;
-b_rectangle     = [b1 b2 b3 b4];
+% % RECTANGLE FOR TESTRIGG4
+% b1              = [-30+4.12;-10.24] *1e-3;  
+% b2              = [-30+4.36;11.24]  *1e-3;   
+% b3              = [30-4.52;11.24]   *1e-3;    
+% b4              = [30-4.54;-10.24]  *1e-3;
+% b_rectangle     = [b1 b2 b3 b4];
 
 
-% % RECTANGLE
-% b1              = [-MP_len_x/2;-MP_len_y/2];  
-% b2              = [-MP_len_x/2;MP_len_y/2];   
-% b3              = [MP_len_x/2;MP_len_y/2];    
-% b4              = [MP_len_x/2;-MP_len_y/2];
-% b_rectangle               = [b1 b2 b3 b4];
+% RECTANGLE
+b1              = [-MP_len_x/2;-MP_len_y/2];  
+b2              = [-MP_len_x/2;MP_len_y/2];   
+b3              = [MP_len_x/2;MP_len_y/2];    
+b4              = [MP_len_x/2;-MP_len_y/2];
+b_rectangle               = [b1 b2 b3 b4];
 
 % TRIANGLE
 b1              = [0;-MP_len_y/2];
