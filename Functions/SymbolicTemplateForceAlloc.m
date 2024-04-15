@@ -1,4 +1,6 @@
 %% Symbolic Functions For Force Allocation Algorithm
+%
+% Made by Magnus Grøterud.
 syms f1 f2 f3 f4 f_min f_max f_ref c p s1 s2 s3 b epsilon 
 
 %% Force Optimization Variable

@@ -55,6 +55,7 @@ function arrowKeyDemo_chatGPT(device)
                     phi = phi + deg2rad(angleIncrement);
                 case 'd' % 'd' key
                     phi = phi - deg2rad(angleIncrement);
+                    
             end
             
             % Update the plot
