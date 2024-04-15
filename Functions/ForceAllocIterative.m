@@ -15,21 +15,21 @@ clc
 
 init_CDPR_Params
 
-q0 = [0;0;0];
+q0 = [0.4;0;0];
 a = CDPR_Params.SGM.FrameAP;
 b = CDPR_Params.SGM.BodyAP.RECTANGLE;
 
 A = WrenchMatrix_V2(a,b,q0); 
 
-f_min = 1;
-f_max = 100;
-f_ref = 30;
+f_min = 5;
+f_max = 60;
+f_ref = 25;
 
 fMinVec = f_min*ones(4,1);
 fMaxVec = f_max*ones(4,1);
 
 
-w_ref = [5;0;0];
+w_ref = [-10;0;0];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Force Allocation Algorithm
@@ -72,8 +72,6 @@ epsilon = 10^(-3);          % For slack version, not implemented yet.
 % z = zeros(n+m,1);
 % PHI = MeritFunction(grad_g_f, W, z, w_ref)
 
-
-
 %% Newtons Method on the KKT Conditions
 % Initialization
 iter    = 0;
@@ -91,6 +89,8 @@ while iter <= iterMax
     f = z(1:n);
     grad_g_f = GradientObjFunc(f, f_min, f_max,f0, c1,c2,p,alpha);
     H_g_f = HessianObjFunc(f, f_min, f_max,f0, c1,c2,p,alpha);
+
+    % [ObjFun, GradObj, HessObj] = calculate_g_f(f(1), f(2), f(3), f(4), f_min, f_max, f0, c1, c2);
     
     A = [H_g_f W';W zeros(3,3)];
     B = [grad_g_f;W*f - w_ref];
@@ -101,7 +101,7 @@ while iter <= iterMax
     % 2) Linesearch with Merit Function
     kappa           = 1;                    % Initial Step Size for Newton Step
     disp("Merit Function Value Iteration " + string(iter) + ":\n")
-    phiMerit        = MeritFunction(z, grad_g_f, W, w_ref);
+    phiMerit        = MeritFunction(z, grad_g_f, W, w_ref)
     phi_kappa       = MeritFunction(z+kappa*d_k, grad_g_f, W, w_ref); 
     D_phi           = D_MeritFunc(z,grad_g_f, W, w_ref, d_k);
 
@@ -115,6 +115,7 @@ while iter <= iterMax
             break
         end
         
+        phi_kappa       = MeritFunction(z+kappa*d_k, grad_g_f, W, w_ref); 
         iterMerit = iterMerit + 1;
 
         if iterMerit > iterMax
@@ -140,6 +141,7 @@ while iter <= iterMax
     end
 end
 toc
+
 f = z(1:4)
 
 
@@ -161,7 +163,7 @@ function grad_g_f = GradientObjFunc(f, f_min, f_max,f_0, c1,c2,p,alpha)
 grad_g_f = zeros(4,1);      % Memory Allocation
 
 for i= 1:4
-    grad_g_f(i) = (p*abs(f(i) - f_0))/alpha - c1/(f(i) - f_min) - c2/(f_max - f(i));  
+    grad_g_f(i) = (p*abs(f(i) - f_0))/alpha^p - c1/(f(i) - f_min) - c2/(f_max - f(i));  
 end
 end
 
@@ -208,6 +210,7 @@ end
 
 
 
+% end
 
 
 
