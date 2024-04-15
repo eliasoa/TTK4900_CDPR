@@ -29,7 +29,7 @@ fMinVec = f_min*ones(4,1);
 fMaxVec = f_max*ones(4,1);
 
 
-w_ref = [10;0;0];
+w_ref = [5;0;0];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Force Allocation Algorithm
@@ -78,8 +78,9 @@ epsilon = 10^(-3);          % For slack version, not implemented yet.
 % Initialization
 iter    = 0;
 iterMax = 1000;
-f       = f0*ones(4,1);         % Initial Force
+f       = f0*ones(n,1);         % Initial Force
 lambda  = zeros(m,1);
+lambda_prev = zeros(m,1);
 alpha = (f_max - f_min)/2;      % Normalization Factor to avoid numerical accuracy issues
 
 z       = [f;lambda];           % z = [f;lambda]
@@ -90,13 +91,16 @@ while iter <= iterMax
     f = z(1:n);
     grad_g_f = GradientObjFunc(f, f_min, f_max,f0, c1,c2,p,alpha);
     H_g_f = HessianObjFunc(f, f_min, f_max,f0, c1,c2,p,alpha);
+    
     A = [H_g_f W';W zeros(3,3)];
     B = [grad_g_f;W*f - w_ref];
 
     d_k = A\-B;
+    d_k(n+1:n+m) = d_k(n+1:n+m)- lambda_prev;
 
     % 2) Linesearch with Merit Function
     kappa           = 1;                    % Initial Step Size for Newton Step
+    disp("Merit Function Value Iteration " + string(iter) + ":\n")
     phiMerit        = MeritFunction(z, grad_g_f, W, w_ref);
     phi_kappa       = MeritFunction(z+kappa*d_k, grad_g_f, W, w_ref); 
     D_phi           = D_MeritFunc(z,grad_g_f, W, w_ref, d_k);
@@ -106,6 +110,10 @@ while iter <= iterMax
 
     while phi_kappa > phiMerit + D_phi && iterMerit <= iterMeritMax
         kappa = kappa-0.01;
+        if kappa <= 0
+            kappa = 0;
+            break
+        end
         
         iterMerit = iterMerit + 1;
 
@@ -113,9 +121,11 @@ while iter <= iterMax
             disp("Too many iterations (Merit Function)")
         end
     end
-
+    
+    
     % 3) Perform Newton step
     z = z + kappa*d_k; 
+    lambda_prev = z(n+1:n+m);
     
     % 4) Check if  merit function is below the predetermined tolerance threshold
     if phiMerit < tol 
@@ -193,6 +203,7 @@ function D_phi_merit = D_MeritFunc(z,grad_g, W, w_ref, d_k)
     p_k             = d_k(1:4);
     DphiVec         = [grad_g'*p_k + W'*lambda;W*f - w_ref]; % VEEELDIG USIKKER PÅ DENNE
     D_phi_merit     = norm(DphiVec, Inf);
+  
 end
 
 
