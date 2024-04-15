@@ -1,36 +1,36 @@
-% function f = ForceAllocIterativeSlack(A,a,b,f_min, f_max, f_ref, f_prev, w_ref)
+function f = ForceAllocIterativeSlack(A,f_min, f_max, f_ref, f_prev, w_ref)
 
-% Function for calculating optimal force distributions of a Cable Robot.
+% Function for calculating optimal force distributions of a Cable Driven Parallel Robot.
 % Inspired by Einar Ueland, Thomas Sauder and Roger Skjetne, Department of
 % Marine Technology; Norwegian University of Science and Technology; 
 % Centre for Autonomous Marine Operations and Systems (NTNU AMOS);
 % NO-7491 Trondheim, Norway
 % SINTEF Ocean; NO-7465 Trondheim, Norway  
 %
-% Created by Magnus Grøterud, --.04.2024
+% Created by Magnus Grøterud, 13.04.2024
 
 %% TESTING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear all
-clc
-
-init_CDPR_Params
-SymbolicTemplateForceAlloc
-
-q0 = [0.4;0;0];
-a = CDPR_Params.SGM.FrameAP;
-b = CDPR_Params.SGM.BodyAP.RECTANGLE;
-
-A = WrenchMatrix_V2(a,b,q0); 
-
-f_min = 5;
-f_max = 60;
-f_ref = 25;
-
-fMinVec = f_min*ones(4,1);
-fMaxVec = f_max*ones(4,1);
-
-
-w_ref = [-10;0;0];
+% clear all
+% clc
+% 
+% init_CDPR_Params
+% SymbolicTemplateForceAlloc
+% 
+% q0 = [-0.4;-0.2;0];
+% a = CDPR_Params.SGM.FrameAP;
+% b = CDPR_Params.SGM.BodyAP.RECTANGLE;
+% 
+% A = WrenchMatrix_V2(a,b,q0); 
+% 
+% f_min = 5;
+% f_max = 60;
+% f_ref = 25;
+% 
+% fMinVec = f_min*ones(4,1);
+% fMaxVec = f_max*ones(4,1);
+% 
+% 
+% w_ref = [-10;0;0];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -42,7 +42,7 @@ p = 2;          % P-norm value
 
 % Defining the Optimization Matrices
 W = A';         % Optimization Matrix
-H = pinv(W);    % Pseudo inverse of W
+% H = pinv(W);    % Pseudo inverse of W
 Q = eye(m);     % Weighting matrix for slack variable
 
 A = [W Q];      % Optimization matrix with slack
@@ -51,39 +51,17 @@ A = [W Q];      % Optimization matrix with slack
 f0 = f_ref;
 
 % Params
-% sigma   = norm(H,1);
-% lambda  = max(abs(f_max - f0), abs(f0 - f_min));
 c       = 0.1;              % Constant enabling adjustments in how fast the cost function increases
 epsilon = 10^(-3);          % For slack version, not implemented yet.
 b       = 200;              % 
 
-% delta 
-
-%% Defining the constraints (SYMBOLIC)
-% syms f1 f2 f3 f4
-% f_syms = [f1;f2;f3;f4];
-% 
-% h_c = [f_syms - fMinVec;f_max-f_syms];        % Cable Force Constraint
-% grad_h = jacobian(h_c,f_syms);            % Derivative of h_c
-
-%% Defining the objective function
-
-% % TEST
-% f = [20;28;23;18];
-% 
-% g_f = ObjectiveFunction(f, f_min, f_max, f0, c1, c2, p)
-% grad_g_f = GradientObjFunc(f, f_min, f_max,f0, c1,c2,p)
-% H_g_f = HessianObjFunc(f, f_min, f_max,f0, c1,c2,p)
-% 
-% z = zeros(n+m,1);
-% PHI = MeritFunction(grad_g_f, W, z, w_ref)
 
 %% Newtons Method on the KKT Conditions
 % Initialization
 iter    = 0;
 iterMax = 1000;
 
-f       = f0*ones(n,1);         % Initial Force (SHOULD BE F_PREV WHEN RUNNING)
+f       = f_prev;        %f0*ones(n,1);         % Initial Force (SHOULD BE F_PREV WHEN RUNNING)
 s       = zeros(m,1);           % Initial Slack Variables
 x       = [f;s];                % Optimization Variables
 
@@ -110,8 +88,8 @@ while iter <= iterMax
 
     % 2) Linesearch with Merit Function
     kappa           = 1;                    % Initial Step Size for Newton Step
-    disp("Merit Function Value Iteration " + string(iter) + ":")
-    phiMerit        = MeritFunction(z, GradientX, A, w_ref)
+    % disp("Merit Function Value Iteration " + string(iter) + ":")
+    phiMerit        = MeritFunction(z, GradientX, A, w_ref);
     phi_kappa       = MeritFunction(z+kappa*d_k, GradientX, A, w_ref); 
     D_phi           = D_MeritFunc(z,GradientX, A, w_ref, d_k);
 
@@ -158,17 +136,17 @@ while iter <= iterMax
 end
 toc
 
-f = z(1:4)
+f = z(1:4);
 
 
 %% Functions
 
 % Function for calculating the merit function
 function phi_merit = MeritFunction(z,grad_g, A, w_ref)
-    x       = z(1:7);
-    lambda  = z(8:10);
-    phiVec = [grad_g + A'*lambda;A*x - w_ref];
-    phi_merit = norm(phiVec, Inf);
+    x_local         = z(1:7);
+    lambda_local    = z(8:10);
+    phiVec          = [grad_g + A'*lambda_local;A*x_local - w_ref];
+    phi_merit       = norm(phiVec, Inf);
 end
 
 % Function for calculating the "Directional Derivative" of merit function
@@ -178,14 +156,14 @@ end
 %
 % (OBS: Tror ikke denne er helt riktig)
 function D_phi_merit = D_MeritFunc(z,grad_g, A, w_ref, d_k)
-    x               = z(1:7);
-    lambda          = z(8:10);
+    x_local         = z(1:7);
+    lambda_local    = z(8:10);
     p_k             = d_k(1:7);
-    DphiVec         = [grad_g'*p_k + A'*lambda;A*x - w_ref]; % VEEELDIG USIKKER PÅ DENNE
+    DphiVec         = [grad_g'*p_k + A'*lambda_local;A*x_local - w_ref]; % VEEELDIG USIKKER PÅ DENNE
     D_phi_merit     = norm(DphiVec, Inf);
 end
 
-
+end
 
 
 
