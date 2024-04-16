@@ -51,11 +51,11 @@ Wp              = mp*[0 -g 0]';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   OBS: LAG DENNE MER DYNAMISK/MINDRE HARDKODA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-a1              = [-F_len_x/2;-F_len_y/2 ];  
-a2              = [-F_len_x/2 ;F_len_y/2 ];
-a3              = [F_len_x/2 ;F_len_y/2];    
-a4              = [F_len_x/2;-F_len_y/2 ];  
-a               = [a1 a2 a3 a4];
+a = [ -0.7516   -0.7516    0.7516    0.7516;
+      -0.4181    0.4181    0.4181   -0.4181];
+
+
+% a               = [a1 a2 a3 a4];
 
 % a               = [0.2 -0.2; 0 0]; % 1 DoF test rigg
 % b               = [0 0; 0 0]; 
@@ -85,11 +85,8 @@ b4              = b1;
 b_triangle               = [b1 b2 b3 b4];
 
 % TRAPEZOIDAL
-b1              = [-MP_len_x/4;-MP_len_y/2];
-b2              = [-MP_len_x/2;MP_len_y/2];   
-b3              = [MP_len_x/2;MP_len_y/2];     
-b4              = [MP_len_x/4;-MP_len_y/2];   
-b_trapez      = [b1 b2 b3 b4];
+b_trapez        = [ -0.0250   -0.0750    0.0750    0.0250;
+                    -0.0100    0.0100    0.0100   -0.0100];
 
 
 % Discrete Linear Model
@@ -126,10 +123,10 @@ K_r = pinv((B_c*K_f-A_c)\B_c);
 K_a = [diag([-10,-10,-1]) zeros(3,3)];
 
 % Motorsign (CHANGE IF NEEDED)
-motorsign0 = 1;
+motorsign0 = -1;
 motorsign1 = 1;
 motorsign2 = -1;
-motorsign3 = -1;
+motorsign3 = 1;
 
 motorsigns = [motorsign0;motorsign1;motorsign2;motorsign3];
 
