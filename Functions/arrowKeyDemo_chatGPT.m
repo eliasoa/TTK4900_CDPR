@@ -83,7 +83,7 @@ function arrowKeyDemo_chatGPT(device)
             % setMotorTorque(t4, DEVICE4)
 
             % % TEST
-            setMotorPosition(x, 2, 0.5, device)
+            % setMotorPosition(x, 2, 0.5, device)
 
         end
     end

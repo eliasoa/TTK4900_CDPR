@@ -17,13 +17,13 @@ addpath(folderPath);
 %% Set up ASCII communication
 baudrate = 115200;
 timeout = 1;
-ODriveStruct = initSerialPorts(baudrate, timeout);
+% ODriveStruct = initSerialPorts(baudrate, timeout);
 
 %% Generate structs with ODrive modes and error codes (enum from Arduino)
 % Each struct has to be passed as an argument if they need to be used in a
 % function
 
-init_ODriveEnums;
+% init_ODriveEnums;
 init_CDPR_Params;
 
 %% How to access each driver in the driver struct
@@ -42,8 +42,8 @@ init_CDPR_Params;
 % end
 %% Main program
 while true
-    userInput = input('Enter a number or type "exit" to stop: ', 's'); % 's' for string input
-    % userInput = '2';
+    % userInput = input('Enter a number or type "exit" to stop: ', 's'); % 's' for string input
+    userInput = '1';
     if strcmp(userInput, 'exit')
         clc
         disp('Exiting...');
@@ -59,7 +59,8 @@ while true
                 clc
                 disp("Move with cursor mode")
                 disp("Press Esc to exit")
-                arrowKey_manual_control(ODriveStruct, ODriveEnums, CDPR_Params)
+                % arrowKey_manual_control(ODriveStruct, ODriveEnums, CDPR_Params);
+                arrowKeyDebugger(CDPR_Params)
                 clc
 
             case 2
