@@ -1,5 +1,4 @@
 function [f,w_resultant] = ForceAllocIterativeSlack(A,f_min, f_max, f_ref, f_prev, w_ref)
-
 % Function for calculating optimal force distributions of a Cable Driven Parallel Robot.
 %
 % Inspired by Einar Ueland, Thomas Sauder and Roger Skjetne, Department of
@@ -9,7 +8,19 @@ function [f,w_resultant] = ForceAllocIterativeSlack(A,f_min, f_max, f_ref, f_pre
 % SINTEF Ocean; NO-7465 Trondheim, Norway  
 %
 % Created by Magnus Grøterud, 13.04.2024
-
+%
+% Outputs:
+%   f           : 4x1 Vector, calculated cable forces [f1;f2;f3;f4]
+%   w_resultant : 3x1 Vector, calculated wrench [Fx;Fy:Mphi]
+%
+% Inputs:
+%   A           : 4x3 Matrix, Structure Matrix
+%   f_min       : Scalar, lower limit on cable forces
+%   f_max       : Scalar, upper limit on cable forces
+%   f_ref       : Scalar, preferred cable forces 
+%   f_prev      : Scalar, previous cable forces
+%   w_ref       : 3x1 Vector, desired wrench 
+%
 %% TESTING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % clear all
 % clc
@@ -52,7 +63,7 @@ A = [W Q];      % Optimization matrix with slack
 c       = 0.1;              % Parameter adjusting how fast the cost function for the standard formulation increases
 epsilon = 10^(-3);          % Parameter adjusting the curvature of the cost function for the slacked formulation
 b       = 200;              % Parameter steering the gradient of the cost term for the slacked formulation
-c_phi   = 10^(-3);          % Parameter for checking merit function value
+c_phi   = 1;  %10^(-3);     % Parameter for checking merit function value
 
 
 %% Newtons Method on the KKT Conditions
