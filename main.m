@@ -17,13 +17,13 @@ addpath(folderPath);
 %% Set up ASCII communication
 baudrate = 115200;
 timeout = 1;
-% ODriveStruct = initSerialPorts(baudrate, timeout);
+ODriveStruct = initSerialPorts(baudrate, timeout);
 
 %% Generate structs with ODrive modes and error codes (enum from Arduino)
 % Each struct has to be passed as an argument if they need to be used in a
 % function
 
-% init_ODriveEnums;
+init_ODriveEnums;
 init_CDPR_Params;
 
 %% How to access each driver in the driver struct
@@ -42,8 +42,8 @@ init_CDPR_Params;
 % end
 %% Main program
 while true
-    % userInput = input('Enter a number or type "exit" to stop: ', 's'); % 's' for string input
-    userInput = '1';
+    userInput = input('Enter a number or type "exit" to stop: ', 's'); % 's' for string input
+    % userInput = '1';
     if strcmp(userInput, 'exit')
         clc
         disp('Exiting...');
@@ -54,7 +54,7 @@ while true
 
         % Switch-case structure to handle different numeric inputs
         switch number
-            
+
             case 1
                 clc
                 disp("Move with cursor mode")
@@ -65,11 +65,11 @@ while true
 
             case 2
                 clc
-                disp("Set home position")
+                disp("Set homing tension")
                 userInput = input("Ensure that the MP is fastened at the origin with the drill bit. Type y when done: ", 's');
                 if userInput == 'y'
                     disp("Setting homing tension")
-                    T = [-0.39; -0.39; 0.39; 0.39];
+                    T = [0.39; -0.39; 0.39; -0.39];
                     fieldNames = fieldnames(ODriveStruct);
                     for k = 1:length(fieldNames)
                         fieldName = fieldNames{k}; % Current field name as a string
@@ -80,27 +80,48 @@ while true
                         setMotorTorque(T(k), currentSerialPort)
                         pause(0.1)
                     end
-                    pause(2);
-                    % Set home position
-                    for k = 1:length(fieldNames)
-                        fieldName = fieldNames{k}; % Current field name as a string
-                        currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-                        setEncoderPositions(currentSerialPort);
-                    end
-                    disp("Pause 1 sec")
-                    pause(1);
-                    % for k = 1:length(fieldNames)
-                    %     fieldName = fieldNames{k}; % Current field name as a string
-                    %     currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-                    %     setMotorTorque(0, currentSerialPort);
-                    %     setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, currentSerialPort);
-                    %     pause(0.4)
-                    % end
                 else
                     disp("Insert homing plug and try again xddddd")
                 end
 
             case 3
+                disp("Set home position")
+                % Set home position
+                fieldNames = fieldnames(ODriveStruct);
+                for k = 1:length(fieldNames)
+                    fieldName = fieldNames{k}; % Current field name as a string
+                    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+                    setEncoderPositions(currentSerialPort);
+                end
+
+
+            case 4
+                clc
+                disp("Clear errors")
+                errorCheckAndHandling(ODriveStruct, ODriveError);
+
+            case 5
+                clc
+                disp("Testing: 4 motors")
+                a = CDPR_Params.SGM.FrameAP;
+                b = CDPR_Params.SGM.BodyAP.TRAPEZOID;
+
+                [L0,l0, A_transposed] = CDPR_InverseKinematics_V2([0;0;0], a, b)
+                % l0 = [0.8228;0.7798;0.7798;0.8228];
+                q = DirectKinematics_V2(a,b,l0)
+                % TestRigg_4_motors(ODriveStruct, ODriveEnums, CDPR_Params);
+
+            case 6
+                disp("Enable enable_dc_bus_voltage_feedback on all ODrives")
+                % calibrateMotor(ODriveStruct.ODrive0,ODriveEnums)
+                fieldNames = fieldnames(ODriveStruct);
+                for k = 1:length(fieldNames)
+                    fieldName = fieldNames{k}; % Current field name as a string
+                    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field name
+                    enableBrakeResistorVoltageFeedback(currentSerialPort);
+                end
+
+            case 7
                 disp("Check workspace")
                 % motorPosTest(ODriveStruct, ODriveEnums);
                 phi_0 = 0;
@@ -116,26 +137,6 @@ while true
                 resolution = 100;
                 color = 'red';
                 TranslationWorkspace_V2(phi_0,a,b,m_p, f_min,f_max, f_ref, w, resolution, color)
-
-            case 4
-                clc
-                disp("Testing mode")
-                errorCheckAndHandling(ODriveStruct, ODriveError);
-
-            case 5
-                clc
-                disp("Testing: 4 motors")
-                TestRigg_4_motors(ODriveStruct, ODriveEnums, CDPR_Params)
-
-            case 6
-                disp("Enable enable_dc_bus_voltage_feedback on all ODrives")
-                % calibrateMotor(ODriveStruct.ODrive0,ODriveEnums)
-                fieldNames = fieldnames(ODriveStruct);
-                for k = 1:length(fieldNames)
-                    fieldName = fieldNames{k}; % Current field name as a string
-                    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field name
-                    enableBrakeResistorVoltageFeedback(currentSerialPort);
-                end
 
             otherwise
                 disp('Input number does not match any function.');

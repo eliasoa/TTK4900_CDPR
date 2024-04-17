@@ -15,13 +15,17 @@ r0 = [x0; y0];
 q0 = [r0; theta0];
 qd0 = [xd0;yd0; thetad0];
 
-
 h = 0.01;       % Sampling time (can be overwritten in main_script)
-Rs = 0.02;      % Spool radius
 
+% Spool Parameters
+Rs  = 0.02;                 % Spool radius
+P   = 2.9*10^(-3);          % Pitch of spool
+d   =                       % Horizontal distance from cable outlet of spool to pulley  
+h0  =                       % Vertical Height from spool to pulley
+hs  =  sqrt(d^2 + h0^2);    % Length of cable between spool and pulley (at x=0, home position) 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Physical parameters 
+%% Physical parameters 
 g               = 9.81;                     % m/s^2
 
 % Mobile Platform parameters
@@ -47,15 +51,76 @@ dr  = 0.0;                                  % Rotational dampening coefficient a
 % Wrench due to gravity
 Wp              = mp*[0 -g 0]';
 
-% Cable attachment points PULLEY (In INERTIA coordinates) CONSTANT
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   OBS: LAG DENNE MER DYNAMISK/MINDRE HARDKODA
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-a1              = [-F_len_x/2;-F_len_y/2 ];  
-a2              = [-F_len_x/2 ;F_len_y/2 ];
-a3              = [F_len_x/2 ;F_len_y/2];    
-a4              = [F_len_x/2;-F_len_y/2 ];  
-a               = [a1 a2 a3 a4];
+%% Cable attachment points PULLEY (In INERTIA coordinates) CONSTANT
+%% SØLVE
+h_pb = 30.2*1e-3; % [m] - height of pillow block bearing
+a_pb = 127*1e-3;  % [m] - length of pillow block bearing
+
+x = 0;
+y = 0;
+r = [x; y];
+theta = 0;
+q = [r;theta]; % Generalized coordinates of platform
+
+profile_side_length = 30*1e-3; % [m]
+fspace_w = 1400*1e-3; % [m]
+fspace_h = 1000*1e-3; % [m]
+
+% length_drum_x = fspace_w/2+profile_side_length+a_pb/2-1*1e-3;
+length_drum_x = [sqrt(1.52^2 + 2.99^2);
+                 sqrt(2.61^2 + 1.83^2);
+                 sqrt(0.98^2 + 0.8^2);
+                 sqrt(0.65^2 + 0.55^2)]*10^(-3);
+length_drum_y = profile_side_length/2 + h_pb;
+
+
+dc1 = [-length_drum_x(1); -length_drum_y];
+dc2 = [-length_drum_x(2);  length_drum_y];
+dc3 = [ length_drum_x(3);  length_drum_y];
+dc4 = [ length_drum_x(4); -length_drum_y];
+
+beta_e = 0.17896;
+r_d = 20*1e-3;
+% beta_e*180/pi
+
+de1 = dc1 + [r_d*cos(pi+beta_e);   r_d*sin(pi+beta_e)];
+de2 = dc2 + [r_d*cos(pi-beta_e);   r_d*sin(pi-beta_e)];
+de3 = dc3 + [r_d*cos(beta_e);      r_d*sin(beta_e)];
+de4 = dc4 + [r_d*cos(2*pi-beta_e); r_d*sin(2*pi-beta_e)];
+
+r_p = 12*1e-3;
+angle_profile_side_length = 40*1e-3;
+pulley_mounting_hole_offset = 4*1e-3;
+pulley_mh_to_wh = [26.4; 41.9]*1e-3; % Length between the pulley assembly 
+                                % mounting hole to the pulley wheel hole
+length_pulley_x = fspace_w/2+profile_side_length + ...
+                  angle_profile_side_length - ...
+                  pulley_mounting_hole_offset - ...
+                  pulley_mh_to_wh(1);
+length_pulley_y = fspace_h/2-angle_profile_side_length-pulley_mh_to_wh(2);
+
+pc1 = [-length_pulley_x; -length_pulley_y];
+pc2 = [-length_pulley_x;  length_pulley_y-30*1e-3];
+pc3 = [ length_pulley_x;  length_pulley_y-30*1e-3];
+pc4 = [ length_pulley_x; -length_pulley_y];
+pc = [pc1 pc2 pc3 pc4];
+
+pe1 = pc1 + [r_p*cos(pi+beta_e);   r_p*sin(pi+beta_e)];
+pe2 = pc2 + [r_p*cos(pi-beta_e);   r_p*sin(pi-beta_e)];
+pe3 = pc3 + [r_p*cos(beta_e);      r_p*sin(beta_e)];
+pe4 = pc4 + [r_p*cos(2*pi-beta_e); r_p*sin(2*pi-beta_e)];
+
+a1 = pc1 - [r_p; 0];
+a2 = pc2 - [r_p; 0];
+a3 = pc3 + [r_p; 0];
+a4 = pc4 + [r_p; 0];
+
+a = [a1 a2 a3 a4];
+
+% a = [ -0.7516   -0.7516    0.7516    0.7516;
+%       -0.4181    0.4181    0.4181   -0.4181];
+
+% a               = [a1 a2 a3 a4];
 
 % a               = [0.2 -0.2; 0 0]; % 1 DoF test rigg
 % b               = [0 0; 0 0]; 
@@ -68,6 +133,9 @@ a               = [a1 a2 a3 a4];
 % b3              = [30-4.52;11.24]   *1e-3;    
 % b4              = [30-4.54;-10.24]  *1e-3;
 % b_rectangle     = [b1 b2 b3 b4];
+
+
+
 
 
 % RECTANGLE
@@ -85,14 +153,11 @@ b4              = b1;
 b_triangle               = [b1 b2 b3 b4];
 
 % TRAPEZOIDAL
-b1              = [-MP_len_x/4;-MP_len_y/2];
-b2              = [-MP_len_x/2;MP_len_y/2];   
-b3              = [MP_len_x/2;MP_len_y/2];     
-b4              = [MP_len_x/4;-MP_len_y/2];   
-b_trapez      = [b1 b2 b3 b4];
+b_trapez        = [ -0.0250   -0.0750    0.0750    0.0250;
+                    -0.0100    0.0100    0.0100   -0.0100];
 
 
-% Discrete Linear Model
+%% Discrete Linear Model
 A_c = [0  0 0  1       0       0;        % 
        0  0 0  0       1       0;
        0  0 0  0       0       1;
@@ -126,10 +191,10 @@ K_r = pinv((B_c*K_f-A_c)\B_c);
 K_a = [diag([-10,-10,-1]) zeros(3,3)];
 
 % Motorsign (CHANGE IF NEEDED)
-motorsign0 = 1;
+motorsign0 = -1;
 motorsign1 = 1;
 motorsign2 = -1;
-motorsign3 = -1;
+motorsign3 = 1;
 
 motorsigns = [motorsign0;motorsign1;motorsign2;motorsign3];
 
@@ -144,6 +209,11 @@ CDPR_BodyAnchorPoints = struct("RECTANGLE", b_rectangle, ...
                                "TEST", b_rectangle);
 CDPR_SGM = struct("FrameAP", a, ...
                   "BodyAP", CDPR_BodyAnchorPoints);
+
+% Spool Params
+CDPR_SpoolParams  = struct("SPOOL_RADIUS", Rs, ...
+                           "PITCH", P, ...
+                           "SPOOL_PULLEY_LENGTH",hs);
 
 % Control Params
 CDPR_ControlParams = struct("K_d", K_d, ...
@@ -160,9 +230,9 @@ CDPR_SystemMatrices = struct("A_c_aug", A_c_aug, ...
 
 % General Parameters
 CDPR_GenParams = struct("SAMPLING_TIME", h, ...
-                        "SPOOL_RADIUS", Rs, ...
-                        "Platform_mass", mp, ...
-                        "MOTOR_SIGNS", motorsigns);
+                        "MASS_PLATFORM", mp, ...
+                        "MOTOR_SIGNS", motorsigns, ...
+                        "SpoolParams", CDPR_SpoolParams);
 % More?
 
 
