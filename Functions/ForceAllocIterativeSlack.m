@@ -1,4 +1,4 @@
-function [f,w_resultant] = ForceAllocIterativeSlack(A,f_min, f_max, f_ref, f_prev, w_ref)
+function [f,w_resultant, flag] = ForceAllocIterativeSlack(A,f_min, f_max, f_ref, f_prev, w_ref)
 
 % Function for calculating optimal force distributions of a Cable Driven Parallel Robot.
 %
@@ -51,6 +51,8 @@ function [f,w_resultant] = ForceAllocIterativeSlack(A,f_min, f_max, f_ref, f_pre
 
 %% Force Allocation Algorithm
 
+flag = 0;
+
 m = 3;          % Number of Controllable DOFs
 n = 4;          % Number of actuating cables
 p = 2;          % P-norm value
@@ -62,7 +64,7 @@ Q = eye(m);     % Weighting matrix for slack variable
 A = [W Q];      % Optimization matrix with slack
 
 % Params
-c       = 0.1;              % Parameter adjusting how fast the cost function for the standard formulation increases
+c       = 1; %0.1              % Parameter adjusting how fast the cost function for the standard formulation increases
 epsilon = 10^(-3);          % Parameter adjusting the curvature of the cost function for the slacked formulation
 b       = 200;              % Parameter steering the gradient of the cost term for the slacked formulation
 c_phi   = 1;%10^(-3);          % Parameter for checking merit function value
@@ -70,8 +72,8 @@ c_phi   = 1;%10^(-3);          % Parameter for checking merit function value
 
 %% Newtons Method on the KKT Conditions
 % Initialization
-iter    = 0;                    % Initializing iteration counter
-iterMax = 1000;                 % Maximum Iterations
+iter    = 0;                   % Initializing iteration counter
+iterMax = 300;                 % Maximum Iterations
 
 f       = f_prev;               % Initial Force 
 f0      = f_ref;                % Defining the reference force
@@ -147,10 +149,16 @@ while iter <= iterMax
     iter = iter + 1;
     if iter > iterMax
         disp("Too many iterations (Newton Step)")
+        % Safety: Return reference vector
+        f = f_prev;
+        w_resultant = [0;0;0];
+        flag = 1;
+        return
     end
 end
 % toc
 
+% Return calculated forces
 f = z(1:4);
 s = z(5:7);
 w_resultant = w_ref - Q*s;

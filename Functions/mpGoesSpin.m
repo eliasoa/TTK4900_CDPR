@@ -39,26 +39,24 @@ while errorEncountered == false
 
 
     for i=1:length(forces)
-        f = forces(:,i)
+        f = forces(:,i);
         T = f*R.*motorsigns*(-1);
         for k = 1:length(fieldNames)
             fieldName = fieldNames{k};
             currentSerialPort = ODriveStruct.(fieldName);
-            i
-            % T = T + sign(T).*offset2
+            T = T + sign(T).*offset2(k);
             setMotorTorque(T(k), currentSerialPort)
-     
         end
 
     end
 
     
-    T = [0.39; -0.39; 0.39; -0.39];
-    for k = 1:length(fieldNames)
-        fieldName = fieldNames{k};
-        currentSerialPort = ODriveStruct.(fieldName);
-        setMotorTorque(T(k), currentSerialPort)
-    end
+    % T = [0.39; -0.39; 0.39; -0.39];
+    % for k = 1:length(fieldNames)
+    %     fieldName = fieldNames{k};
+    %     currentSerialPort = ODriveStruct.(fieldName);
+    %     setMotorTorque(T(k), currentSerialPort)
+    % end
     errorEncountered = true;
 
 

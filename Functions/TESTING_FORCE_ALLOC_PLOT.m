@@ -6,7 +6,7 @@ clear all
 close
 % Params
 L       = 0.2;
-omega   = 10;
+omega   = 3;
 h       = .1;
 
 % w_ref = [0;0;0];
@@ -15,13 +15,14 @@ init_CDPR_Params
 
 a = CDPR_SGM.FrameAP;
 b = CDPR_SGM.BodyAP.RECTANGLE;
+r_p  = 0.012;
 
 f_min = 5;
 f_max = 60;
 f_ref = 45;
 
 %% Memory Allocation
-N       = 20;
+N       = 1000;
 f       = zeros(4,N);
 
 q0 = [0;0;0];
@@ -40,6 +41,7 @@ f_prev  = f_ref*ones(4,1);
 w_des   = zeros(3,N);
 w_res  = zeros(3,N);
 
+
 %% Control
 Kp  = 20;
 Kd  = 10;
@@ -53,12 +55,15 @@ M_inv = diag([10 10 10]);
 
 %% Test Loop
 for i =1:N
+
+     [~,betar] = p_inverse_kinematics(a,b,qd(:,i), r_p);
     
-    A = WrenchMatrix_V2(a,b,qd(:,i));
+    A_t = structure_matrix(a,b,qd(:,i),r_p, betar);
+    A = A_t';
 
     % e = qd(:,i) - q(:,i);
     e = qd(:,i) - q(:,i);
-    w_des(:,i) = Kp*e; + Kd*q_dot(:,i);
+    w_des(:,i) = [0;0;0];
 
     [f(:,i), w_res(:,i)] = ForceAllocIterativeSlack(A,f_min,f_max,f_ref,f_prev,w_des(:,i));
     

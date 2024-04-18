@@ -78,7 +78,7 @@ while true
                         disp("Motor " + string(k) + " Active")
                         pause(0.1)
                         setMotorTorque(T(k), currentSerialPort)
-                        pause(0.1)
+                        % pause(0.1)
                     end
                 else
                     disp("Insert homing plug and try again xddddd")
