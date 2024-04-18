@@ -85,7 +85,7 @@ lambda_prev = zeros(m,1);       %
 z       = [x;lambda];           % Initial Full state 
 tol     = 5e-5;                 % Merit Function Tolerance
 
-tic
+% tic
 while iter <= iterMax
     % 1) Calculate Newton Step  
        
@@ -110,7 +110,7 @@ while iter <= iterMax
 
     % Check if  merit function is below the predetermined tolerance threshold
     if phiMerit < tol 
-        disp("Algorithm Terminated after " + string(iter) + " iterations.")
+        % disp("Algorithm Terminated after " + string(iter) + " iterations.");
         break
     end
     
@@ -149,7 +149,7 @@ while iter <= iterMax
         disp("Too many iterations (Newton Step)")
     end
 end
-toc
+% toc
 
 f = z(1:4);
 s = z(5:7);

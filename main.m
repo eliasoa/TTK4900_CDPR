@@ -43,7 +43,7 @@ init_CDPR_Params;
 %% Main program
 while true
     userInput = input('Enter a number or type "exit" to stop: ', 's'); % 's' for string input
-    % userInput = '1';
+    % userInput = '8';
     if strcmp(userInput, 'exit')
         clc
         disp('Exiting...');
@@ -103,13 +103,13 @@ while true
             case 5
                 clc
                 disp("Testing: 4 motors")
-                a = CDPR_Params.SGM.FrameAP;
-                b = CDPR_Params.SGM.BodyAP.TRAPEZOID;
+                % a = CDPR_Params.SGM.FrameAP;
+                % b = CDPR_Params.SGM.BodyAP.TRAPEZOID;
 
-                [L0,l0, A_transposed] = CDPR_InverseKinematics_V2([0;0;0], a, b)
+                % [L0,l0, A_transposed] = CDPR_InverseKinematics_V2([0;0;0], a, b)
                 % l0 = [0.8228;0.7798;0.7798;0.8228];
-                q = DirectKinematics_V2(a,b,l0)
-                % TestRigg_4_motors(ODriveStruct, ODriveEnums, CDPR_Params);
+                % q = DirectKinematics_V2(a,b,l0)
+                TestRigg_4_motors(ODriveStruct, ODriveEnums, CDPR_Params);
 
             case 6
                 disp("Enable enable_dc_bus_voltage_feedback on all ODrives")
@@ -124,12 +124,12 @@ while true
             case 7
                 disp("Check workspace")
                 % motorPosTest(ODriveStruct, ODriveEnums);
-                phi_0 = 0;
-                R           = CDPR_Params.Gen_Params.SPOOL_RADIUS;        % Radius of spool
+                phi_0 = 0.09;
+                R           = CDPR_Params.Gen_Params.SpoolParams.SPOOL_RADIUS;        % Radius of spool
                 a           = CDPR_Params.SGM.FrameAP;                    % Frame Anchor Points
-                b           = CDPR_Params.SGM.BodyAP.RECTANGLE;           % Body Anchor Points
+                b           = CDPR_Params.SGM.BodyAP.TRAPEZOID;           % Body Anchor Points
                 motorsigns  = CDPR_Params.Gen_Params.MOTOR_SIGNS;         % Signs determining positive rotational direction
-                m_p         = CDPR_Params.Gen_Params.Platform_mass;       % Mass of MP
+                m_p         = CDPR_Params.Gen_Params.MASS_PLATFORM;       % Mass of MP
                 f_min = 0.2/R;
                 f_max = 0.6/R;
                 f_ref = 0.4/R;
@@ -137,6 +137,14 @@ while true
                 resolution = 100;
                 color = 'red';
                 TranslationWorkspace_V2(phi_0,a,b,m_p, f_min,f_max, f_ref, w, resolution, color)
+            
+            case 8
+                force_struct = load("sine_forces_2.mat");
+                forces = force_struct.f;
+                mpGoesSpin(forces, ODriveEnums,ODriveStruct);
+            case 9
+                posTensionFF(ODriveEnums,ODriveStruct,CDPR_Params)
+
 
             otherwise
                 disp('Input number does not match any function.');

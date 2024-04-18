@@ -20,9 +20,9 @@ h = 0.01;       % Sampling time (can be overwritten in main_script)
 % Spool Parameters
 Rs  = 0.02;                 % Spool radius
 P   = 2.9*10^(-3);          % Pitch of spool
-d   =                       % Horizontal distance from cable outlet of spool to pulley  
-h0  =                       % Vertical Height from spool to pulley
-hs  =  sqrt(d^2 + h0^2);    % Length of cable between spool and pulley (at x=0, home position) 
+% d   =                       % Horizontal distance from cable outlet of spool to pulley  
+% h0  =                       % Vertical Height from spool to pulley
+% hs  =  sqrt(d^2 + h0^2);    % Length of cable between spool and pulley (at x=0, home position) 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Physical parameters 
@@ -115,7 +115,9 @@ a2 = pc2 - [r_p; 0];
 a3 = pc3 + [r_p; 0];
 a4 = pc4 + [r_p; 0];
 
-a = [a1 a2 a3 a4];
+% a = [a1 a2 a3 a4];
+ a = [-0.7560   -0.7560    0.7560    0.7560;
+   -0.4181    0.4181    0.4181   -0.4181];
 
 % a = [ -0.7516   -0.7516    0.7516    0.7516;
 %       -0.4181    0.4181    0.4181   -0.4181];
@@ -212,8 +214,8 @@ CDPR_SGM = struct("FrameAP", a, ...
 
 % Spool Params
 CDPR_SpoolParams  = struct("SPOOL_RADIUS", Rs, ...
-                           "PITCH", P, ...
-                           "SPOOL_PULLEY_LENGTH",hs);
+                           "PITCH", P);%, ...
+                           %"SPOOL_PULLEY_LENGTH",hs);
 
 % Control Params
 CDPR_ControlParams = struct("K_d", K_d, ...

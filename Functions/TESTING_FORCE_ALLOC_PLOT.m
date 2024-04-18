@@ -1,15 +1,13 @@
-
-
 %% Initialization
 
 % Preamble
 clc
 clear all
-
+close
 % Params
-L       = 0.4;
-omega   = 8;
-h       = 0.1;
+L       = 0.2;
+omega   = 10;
+h       = .1;
 
 % w_ref = [0;0;0];
 
@@ -23,11 +21,11 @@ f_max = 60;
 f_ref = 45;
 
 %% Memory Allocation
-N       = 200;
+N       = 20;
 f       = zeros(4,N);
 
 q0 = [0;0;0];
-qd0 = [0;0;0];
+qd0 = [0;L;0];
 
 q       = zeros(3,N);
 q(:,1)  = q0;
@@ -37,6 +35,7 @@ q_ddot  = zeros(3,N);
 
 qd      = zeros(3,N);
 qd(:,1) = qd0;
+
 f_prev  = f_ref*ones(4,1);
 w_des   = zeros(3,N);
 w_res  = zeros(3,N);
@@ -55,7 +54,7 @@ M_inv = diag([10 10 10]);
 %% Test Loop
 for i =1:N
     
-    A = WrenchMatrix_V2(a,b,q(:,i));
+    A = WrenchMatrix_V2(a,b,qd(:,i));
 
     % e = qd(:,i) - q(:,i);
     e = qd(:,i) - q(:,i);
@@ -85,8 +84,10 @@ t = 0:h:(N-1)*h;
 figure(1)
 
 subplot(3,1,1)
-plot([t N*h], qd,'--');hold on
-plot([t], q);hold off
+hold on
+plot([t N*h], qd,'--');
+plot(t, q);
+hold off
 legend("x_d","y_d","phi_d","x","y","phi")
 xlabel("t")
 ylabel("Position nice")
@@ -125,7 +126,29 @@ legend("$F_{x,desired}$","$F_{y,desired}$","$M_{\phi ,desired}$","$F_{x,res}$","
 xlabel("t")
 ylabel("Newton/Newton meter")
 grid on
+%%
 
+% Extract the x and y coordinates from qd
+x = qd(1, 2:end);  % X coordinates
+y = qd(2, 2:end);  % Y coordinates
 
+% Extract the destination x and y coordinates from w_des
+x_end = w_des(1, :);  % End X coordinates
+y_end = w_des(2, :);  % End Y coordinates
 
+% Calculate the components of the arrows
+u = x_end - x;  % Change in X
+v = y_end - y;  % Change in Y
 
+% Create the plot
+figure(3);  % Open a new figure window
+plot(x, y, 'bo');  % Plot the initial points
+hold on;  % Hold on to plot more on the same figure
+quiver(x, y, u, v, 0);  % Plot arrows with no automatic scaling
+hold off;  % Release the hold to add more plots
+
+% Optionally set the axes limits and labels
+axis equal;  % Set equal scaling
+xlabel('X axis');  % Label X-axis
+ylabel('Y axis');  % Label Y-axis
+title('XY plot with directional arrows from qd to w_des');  % Add title

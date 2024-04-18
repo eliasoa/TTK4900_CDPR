@@ -84,11 +84,11 @@ else                                                            % Else, need to 
             f = f_prev;                                     % No solution, return to center of frame
             flag = 3;                                       % Set flag = 2 to alert
             disp("min(f) < f_min) or (max(f) > f_max")
-            h
-            lambda_min
-            lambda_mid
-            lambda_max
-            f0
+            % h
+            % lambda_min
+            % lambda_mid
+            % lambda_max
+            % f0
         end
 
     end
