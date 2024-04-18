@@ -163,6 +163,11 @@ f = z(1:4);
 s = z(5:7);
 w_resultant = w_ref - Q*s;
 
+% Error handling
+if any(f<0)
+    f = f_prev;
+end
+
 
 %% Functions
 
