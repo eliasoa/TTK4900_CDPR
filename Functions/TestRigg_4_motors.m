@@ -31,7 +31,7 @@ l0 = [1.2260 1.1833 1.1833 1.2260]';
 
 % [l,betar] = p_inverse_kinematics(a,b,q, r_p)
 
-f_prev      = [0.39; -0.39; 0.39; -0.39];   % Memory Allocation for prev cable forces
+f_prev      = f_ref*ones(4,1);   % Memory Allocation for prev cable forces
 
 l           = zeros(4,1);                   % Memory Allocation for cable lengths
 l_fk           = zeros(4,1);                   % Memory Allocation for cable lengths
