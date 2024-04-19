@@ -64,7 +64,7 @@ Q = eye(m);     % Weighting matrix for slack variable
 A = [W Q];      % Optimization matrix with slack
 
 % Params
-c       = 1; %0.1              % Parameter adjusting how fast the cost function for the standard formulation increases
+c       = 1.5; %0.1              % Parameter adjusting how fast the cost function for the standard formulation increases
 epsilon = 10^(-3);          % Parameter adjusting the curvature of the cost function for the slacked formulation
 b       = 200;              % Parameter steering the gradient of the cost term for the slacked formulation
 c_phi   = 1;%10^(-3);          % Parameter for checking merit function value
@@ -161,12 +161,17 @@ end
 % Return calculated forces
 f = z(1:4);
 s = z(5:7);
-w_resultant = w_ref - Q*s;
 
 % Error handling
+
 if any(f<0)
+    % Debugging
+    disp("Error: Force Vector calculated as " + string(f) + ". Overwriting to previous force.")
     f = f_prev;
+    flag = 1;
 end
+
+w_resultant = W*f;
 
 
 %% Functions
