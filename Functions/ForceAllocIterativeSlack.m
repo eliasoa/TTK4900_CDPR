@@ -148,7 +148,7 @@ while iter <= iterMax
     % 5) Update main iterations
     iter = iter + 1;
     if iter > iterMax
-        disp("Too many iterations (Newton Step)")
+        % disp("Too many iterations (Newton Step)")
         % Safety: Return reference vector
         f = f_prev;
         w_resultant = [0;0;0];
@@ -166,7 +166,7 @@ s = z(5:7);
 
 if any(f<0)
     % Debugging
-    disp("Error: Force Vector calculated as " + string(f) + ". Overwriting to previous force.")
+    % disp("Error: Force Vector calculated as " + string(f) + ". Overwriting to previous force.")
     f = f_prev;
     flag = 1;
 end
