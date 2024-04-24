@@ -17,7 +17,12 @@ x_diff = 56.40783*1e-3;
 y_diff = 371.4759*1e-3;
 
 % Torque Offsets
-offset2 = [0.13; 0.11; 0.1; 0.2];
+T_s = [0.2;0.15;0.14;0.12]; % Starting torque for motors (from non-cabling testing)
+T_s = [0.2;0.2;0.2;0.2]; % Starting torque for motors
+T_s = [0.3;0.3;0.2;0.2]; % Starting torque for motors
+T_s = 0.05*ones(4,1);%[0.1;0.1;0.1;0.1]; % Starting torque for motors
+precV = 1; % Precision for evaluating velocity
+precT = 1; % Precision for evaluating torque
 
 
 %% Initialize variables
@@ -28,120 +33,124 @@ phi = 0;                            % Desired phi-angle [radians]
 q_d         = [x;y;phi];            % Desired pose
 q           = [0;0;0];
 
-errorEncountered = false;           % Initialize error counter bit
-
-
 l0 = [1.2260 1.1833 1.1833 1.2260]';
 
-% [l,betar] = p_inverse_kinematics(a,b,q, r_p)
+errorEncountered = false;           % Initialize error counter bit
 
-f_prev      = f_ref*ones(4,1);   % Memory Allocation for prev cable forces
+%% Control
+Kp      = diag([200 200 5]);%diag([250 100 1]);  % lol
+Ki      = diag([0 0 0]); 
+e_int   = zeros(3,1);
+% tolInt
 
-l           = zeros(4,1);                   % Memory Allocation for cable lengths
-l_fk           = zeros(4,1);                   % Memory Allocation for cable lengths
-l_enc = zeros(4,1);
-w_d = zeros(4,1);
-% l_dot       = zeros(4,1);                   % Memory Allocation for cable velocities
+%% Preallocation of vectors
+f_prev      = f_ref*ones(4,1);  % Memory Allocation for prev cable forces
 
-% Sine testing - ellipse
-omega = 0.5;
+l           = zeros(4,1);       % Memory Allocation for cable lengths
+l_fk        = zeros(4,1);       % Memory Allocation for cable lengths
+l_enc       = zeros(4,1);
+w_d         = zeros(4,1);
+l_dot       = zeros(4,1);       % Memory Allocation for cable velocities
+pos_rad     = zeros(4,1);
+vel         = zeros(4,1);
+
+%% Logging 
+iter = 100;
+total_time  = zeros(1,iter);
+count       = 1;
+tIter = linspace(1,iter,1);
+
+q_log       = zeros(3,iter);
+qd_log      = zeros(3,iter);
+e_log       = zeros(3,iter);    
+
+%% Sine testing - ellipse
+omega = 3;
 h_test = 0.2;
-Ly = 0.1;
+Ly = 0.2;
 Lx = 0.2;
 time_test = 0;
+h_sample = 0.06;
 
-%% Initialization
-% Get all field names in the ODrive struct
+
+
+
 fieldNames = fieldnames(ODriveStruct);
-
-% for k = 1:length(fieldNames)
-%     fieldName = fieldNames{k}; % Current field name as a string
-%     currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-%
-%     setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, currentSerialPort)
-%     disp("Motor " + string(k) + " Active")
-% end
-
 %% Control Loop
-while errorEncountered == false
-    tic
-    %% Check if error
-    [~, errorsFound, disarmReasonsFound] = getDriverStatus(ODriveStruct, ODriveEnums.Error);
-    if errorsFound || disarmReasonsFound
-        disp("Error occured, stopping motors")
-        for k = 1:length(fieldNames)
-            fieldName = fieldNames{k}; % Current field name as a string
-            currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-            setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, currentSerialPort)
-            disp("Motor " + string(k) + " Idle")
-        end
-        errorEncountered = true;
-        break
-    end
-
+s_start = tic;
+while errorEncountered == false && count <= iter
+t_loop = tic;
     %% Estimate Cable Lengths
-    for k = 1:length(fieldNames)
-        fieldName = fieldNames{k}; % Current field name as a string
-        currentSerialPort = ODriveStruct.(fieldName);                       % Access the current serial port using dynamic field names
-
-        % flush(currentSerialPort)
-        pos = getEncoderPosition(currentSerialPort);
-        % vel = getEncoderVelocity(currentSerialPort);                 % Get angular position and velocity from encoder
-        pos_rad(k) = pos*2*pi;
+    % tic
+    [pos, vel] = TEST_getEncoderReading(ODriveStruct);
+    for k = 1:4      
+        pos_rad(k) = pos(k)*2*pi;
         l_enc(k) = pos_rad(k)*R*motorsigns(k);
 
-
-
         l(k) = l0(k) + l_enc(k);
-        w_d(k) = pos*P;
+        w_d(k) = pos(k)*P;
 
         l_fk(k) = l(k) - sqrt(sqrt(w_d(k)^2+y_diff^2)^2 + x_diff^2);
-
+        % t_solveMatte = toc
         % l(k)        = encoder2cableLen(pos,l(k),R, motorsigns(k)); % Estimate cable length
         % l_dot(k)    = encoder2cableVel(vel, CDPR_Params, motorsigns(k));        % Estimated Rate of change of cable
     end
-    % l_fk
+    % t_getCables = toc;
 
     %% Controller
     % Calculate current and desired pose of the platform
 
     % q           = DirectKinematics_V2(a,b,l)   % Measured pose
-    q_0 = init_fk_estimate(a,b,l_fk)
-    q = p_forward_kinematics(a,b,l_fk,q_0,r_p)
+    % tic
+    q_0 = init_fk_estimate(a,b,l_fk);
+    q = p_forward_kinematics(a,b,l_fk,q_0,r_p);
+    % t_forward = toc
 
     % % Test sine
-    % q_d         = [Lx*sin(omega*time_test);Ly*cos(omega*time_test);phi];            % Desired pose
-    
-    rad2deg(q(3))
+    bla = toc(s_start);
+    q_d         = [Lx*sin(omega*bla);Ly*cos(omega*bla);phi];            % Desired pose
+    % q_d         = [0;Ly*cos(omega*bla);phi];
+    % q_d         = [Lx*sin(omega*bla);0;phi];
+    % q_d = [0.2; 0.2; 0];
+    % rad2deg(q(3));
 
     % Calculate Structure Matrix
+    % tic
     [~,betar] = p_inverse_kinematics(a,b,q, r_p);
+    % t_inverse = toc
+    
+    % tic
     A_t = structure_matrix(a,b,q,r_p,betar);
-
+    % t_struct_mat = toc
     % Calculate Errors
     e           = q_d - q;
-
-    Kp = diag([225 215 1]);%diag([250 100 1]);  % lol
-
+    
+    
+    
     % Desired wrench (TESTE KONTROLLER)
-    w_c =  Kp*e;
-
-    [f,w_rizz,flag] = ForceAllocIterativeSlack(A_t',f_min,f_max,f_ref,f_prev,w_c)
-
+    w_c =  Kp*e + Ki*e_int;
+    % tic
+    [f,w_rizz,flag] = ForceAllocIterativeSlack(A_t',f_min,f_max,f_ref,f_prev,w_c);
+    % t_force = toc
     % Assume ideal world
+      
+    
 
     T = f*R.*motorsigns*(-1); % fordi motorsigns er for endring i kabelendring og ikke rotasjonsretning på torque
-
-    T = T + sign(T).*offset2
+    % tic
+    % offset = ~(ones(4,1)&(fix(vel*10^precV)/10^precV|~(fix(T*10^precT)/10^precT))).*sign(T).*T_s;
+    % t_sol = toc
+    % T = T + offset;
 
 
     % Write torque to motor drivers (YOOOO: CHECK POSITIV REGNING)
+    % tic
     for k = 1:length(fieldNames)
         fieldName = fieldNames{k}; % Current field name as a string
         currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-        % setMotorTorque(T(k), currentSerialPort)
+        setMotorTorque(T(k), currentSerialPort);
     end
-
+    % t_writeTorque = toc
     % Save previous cable forces
     if ~flag
         f_prev = f;
@@ -149,7 +158,35 @@ while errorEncountered == false
 
     % time_test = time_test + h_test;
 
-    toc
+    % Update Integral Error
+    e_int = e_int + e*toc(t_loop);
+    
+    % Logging
+    total_time(count)   = toc(t_loop);
+    q_log(:,count)      = q;
+    qd_log(:,count)     = q_d;
+    e_log(:,count)      = e; 
+    count               = count + 1;
 end
+%% Save logged data
+save("PlotData/PoseData.mat", "q_log","qd_log","e_log");
+%% Plot of total time and Hertz
+figure(1)
+subplot(2,1,1)
+hold on
+plot(total_time)
+ylabel({'Seconds'});
+xlabel({'Iteration number'});
+title({'Loop time'});
+hold off
+subplot(2,1,2)
+hold on
+plot(1./total_time)
+ylabel({'Hz'});
+xlabel({'Iteration number'});
+title({'Loop frequency'});
+hold off
+
+
 
 end

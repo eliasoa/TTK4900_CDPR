@@ -3,7 +3,7 @@ function vel = getEncoderVelocity(device)
 command = "f 0";
 
 % Request feedback from driver
-flush(device)
+% flush(device)
 writeline(device, command)
 
 % Read reply from driver

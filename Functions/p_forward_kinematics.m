@@ -23,7 +23,7 @@ function q_i = p_forward_kinematics(a_i, b_b, ln, q_0, r_p)
         h = (A + mu*eye(3))\(-g);
         
         if norm(h,2) <= epsilon_2*(norm(q_i,2)+epsilon_2)
-            disp('Cond 1')
+            % disp('Cond 1')
             stop = true;
         else
             q_new = q_i + h;
@@ -43,7 +43,7 @@ function q_i = p_forward_kinematics(a_i, b_b, ln, q_0, r_p)
                 g = J.'*phi;
                 cond = norm(g,2) < epsilon_1;
                 if cond
-                    disp('Cond2')
+                    % disp('Cond2');
                     stop = cond;
                 end
                 mu = mu*max([1/3, 1-(2*rho-1)^3]);
@@ -54,7 +54,7 @@ function q_i = p_forward_kinematics(a_i, b_b, ln, q_0, r_p)
             end
         end
     end
-    iter
+    iter;
 end
 
 function J = Jacobian(a, b, pose, l, r_p)

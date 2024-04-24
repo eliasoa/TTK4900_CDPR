@@ -66,6 +66,11 @@ while true
             case 2
                 clc
                 disp("Set homing tension")
+                isError = checkForErrors(ODriveStruct,ODriveEnums);
+                if isError
+                    disp('Errors, please clear them with 4')
+                    return
+                end
                 userInput = input("Ensure that the MP is fastened at the origin with the drill bit. Type y when done: ", 's');
                 if userInput == 'y'
                     disp("Setting homing tension")
@@ -76,7 +81,7 @@ while true
                         currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
                         setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, currentSerialPort)
                         disp("Motor " + string(k) + " Active")
-                        pause(0.1)
+                        pause(0.01)
                         setMotorTorque(T(k), currentSerialPort)
                         % pause(0.1)
                     end
@@ -137,13 +142,29 @@ while true
                 resolution = 100;
                 color = 'red';
                 TranslationWorkspace_V2(phi_0,a,b,m_p, f_min,f_max, f_ref, w, resolution, color)
-            
+
             case 8
+                isError = checkForErrors(ODriveStruct,ODriveEnums);
+                if isError
+                    disp('Errors, please clear them with 4')
+                    return
+                end
                 force_struct = load("sine_forces_2.mat");
                 forces = force_struct.f;
                 mpGoesSpin(forces, ODriveEnums,ODriveStruct);
             case 9
-                posTensionFF(ODriveEnums,ODriveStruct,CDPR_Params)
+                T = [0; 0; 0; 0];
+                fieldNames = fieldnames(ODriveStruct);
+                for k = 1:length(fieldNames)
+                    fieldName = fieldNames{k}; % Current field name as a string
+                    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+                    setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, currentSerialPort)
+                    disp("Motor " + string(k) + " Active")
+                    pause(0.01)
+                    setMotorTorque(T(k), currentSerialPort)
+                    setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, currentSerialPort)
+                    % pause(0.1)
+                end
 
 
             otherwise
