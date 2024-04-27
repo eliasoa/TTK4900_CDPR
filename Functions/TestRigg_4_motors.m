@@ -65,7 +65,7 @@ qd_log      = zeros(3,iter);
 e_log       = zeros(3,iter);    
 
 %% Sine testing - ellipse
-omega = 3;
+omega = 5;
 h_test = 0.2;
 Ly = 0.2;
 Lx = 0.2;
