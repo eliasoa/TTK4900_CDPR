@@ -23,6 +23,12 @@ baudrate = 115200;
 timeout = 1;
 ODriveStruct = initSerialPorts(baudrate, timeout);
 
+%% Memory Allocation
+N = 1000;
+TorqueLog   = zeros(4,N);
+VelLog      = zeros(4,N);
+count = 1;
+
 %% Generate structs with ODrive modes and error codes (enum from Arduino)
 % Each struct has to be passed as an argument if they need to be used in a
 % function
@@ -69,6 +75,11 @@ while ~(all(flag))
         setMotorTorque(MotorTorques(k), currentSerialPort);
         pause(0.2)
     end
+
+    % Log
+    TorqueLog (:,count) = MotorTorques;
+    VelLog(:,count)     = vel;       
+    count               = count + 1;
 end
 
 for k = 1:length(fieldNames)
@@ -76,3 +87,38 @@ for k = 1:length(fieldNames)
     currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
     setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, currentSerialPort)
 end
+
+%% Plotting
+
+save("DynamicalTorque.mat", "TorqueLog", "VelLog");
+
+
+
+figure(1)
+subplot(4,1,1)
+plot(TorqueLog(1,:), VelLog(1,:))
+title("ODrive0")
+xlabel("Torque (Nm)", "Interpreter","latex")
+ylabel("Velocity (turns/s)", "interpreter","latex")
+set ( gca, 'XDir', 'reverse' ) 
+
+subplot(4,1,2)
+plot(TorqueLog(2,:), VelLog(2,:))
+title("ODrive1")
+xlabel("Torque (Nm)", "Interpreter","latex")
+ylabel("Velocity (turns/s)", "interpreter","latex")
+set ( gca, 'XDir', 'reverse' ) 
+
+subplot(4,1,3)
+plot(TorqueLog(3,:), VelLog(3,:))
+title("ODrive2")
+xlabel("Torque (Nm)", "Interpreter","latex")
+ylabel("Velocity (turns/s)", "interpreter","latex")
+set ( gca, 'XDir', 'reverse' ) 
+
+subplot(4,1,4)
+plot(TorqueLog(4,:), VelLog(4,:))
+title("ODrive3")
+xlabel("Torque (Nm)", "Interpreter","latex")
+ylabel("Velocity (turns/s)", "interpreter","latex")
+set ( gca, 'XDir', 'reverse' ) 
