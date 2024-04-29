@@ -148,7 +148,7 @@ t_loop = tic;
     for k = 1:length(fieldNames)
         fieldName = fieldNames{k}; % Current field name as a string
         currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-        setMotorTorque(T(k), currentSerialPort);
+        % setMotorTorque(T(k), currentSerialPort);
     end
     % t_writeTorque = toc
     % Save previous cable forces
@@ -162,6 +162,7 @@ t_loop = tic;
     e_int = e_int + e*toc(t_loop);
     
     % Logging
+    toc(t_loop)
     total_time(count)   = toc(t_loop);
     q_log(:,count)      = q;
     qd_log(:,count)     = q_d;
