@@ -66,11 +66,11 @@ while true
             case 2
                 clc
                 disp("Set homing tension")
-                isError = checkForErrors(ODriveStruct,ODriveEnums);
-                if isError
-                    disp('Errors, please clear them with 4')
-                    return
-                end
+                % isError = checkForErrors(ODriveStruct,ODriveEnums);
+                % if isError
+                %     disp('Errors, please clear them with 4')
+                %     return
+                % end
                 userInput = input("Ensure that the MP is fastened at the origin with the drill bit. Type y when done: ", 's');
                 if userInput == 'y'
                     disp("Setting homing tension")
