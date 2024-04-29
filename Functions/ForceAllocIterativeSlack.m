@@ -194,7 +194,10 @@ function D_phi_merit = D_MeritFunc(z,grad_g, A, w_ref, d_k)
     x_local         = z(1:7);
     lambda_local    = z(8:10);
     p_k             = d_k(1:7);  
-    DphiVec         = [grad_g'*p_k + A'*lambda_local;A*x_local - w_ref]; % VEEELDIG USIKKER PÅ DENNE
+    grad_g'*p_k + A'*lambda_local
+    grad_g
+    A'*lambda_local
+    DphiVec         = [grad_g'*p_k + A'*lambda_local;A*x_local - w_ref] % VEEELDIG USIKKER PÅ DENNE
     D_phi_merit     = norm(DphiVec, Inf);
 end
 
