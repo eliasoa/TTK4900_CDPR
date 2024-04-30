@@ -166,7 +166,7 @@ s = z(5:7);
 
 if any(f<0)
     % Debugging
-    % disp("Error: Force Vector calculated as " + string(f) + ". Overwriting to previous force.")
+    disp("Error: Force Vector calculated as " + string(f) + ". Overwriting to previous force.")
     f = f_prev;
     flag = 1;
 end
@@ -194,10 +194,7 @@ function D_phi_merit = D_MeritFunc(z,grad_g, A, w_ref, d_k)
     x_local         = z(1:7);
     lambda_local    = z(8:10);
     p_k             = d_k(1:7);  
-    grad_g'*p_k + A'*lambda_local
-    grad_g
-    A'*lambda_local
-    DphiVec         = [grad_g'*p_k + A'*lambda_local;A*x_local - w_ref] % VEEELDIG USIKKER PÅ DENNE
+    DphiVec         = [grad_g'*p_k + A'*lambda_local;A*x_local - w_ref]; % VEEELDIG USIKKER PÅ DENNE
     D_phi_merit     = norm(DphiVec, Inf);
 end
 

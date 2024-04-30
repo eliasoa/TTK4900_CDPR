@@ -56,21 +56,23 @@ while true
         switch number
 
             case 1
-                clc
+
                 disp("Move with cursor mode")
                 disp("Press Esc to exit")
                 % arrowKey_manual_control(ODriveStruct, ODriveEnums, CDPR_Params);
-                arrowKeyDebugger(CDPR_Params)
-                clc
+                % arrowKeyDebugger(CDPR_Params)
+                Plotting;
+
+                
 
             case 2
                 clc
                 disp("Set homing tension")
-                % isError = checkForErrors(ODriveStruct,ODriveEnums);
-                % if isError
-                %     disp('Errors, please clear them with 4')
-                %     return
-                % end
+                isError = checkForErrors(ODriveStruct,ODriveEnums);
+                if isError
+                    disp('Errors, please clear them with 4')
+                    return
+                end
                 userInput = input("Ensure that the MP is fastened at the origin with the drill bit. Type y when done: ", 's');
                 if userInput == 'y'
                     disp("Setting homing tension")
@@ -129,19 +131,20 @@ while true
             case 7
                 disp("Check workspace")
                 % motorPosTest(ODriveStruct, ODriveEnums);
-                phi_0 = 0.09;
+                phi_0 =deg2rad(20);
                 R           = CDPR_Params.Gen_Params.SpoolParams.SPOOL_RADIUS;        % Radius of spool
                 a           = CDPR_Params.SGM.FrameAP;                    % Frame Anchor Points
                 b           = CDPR_Params.SGM.BodyAP.TRAPEZOID;           % Body Anchor Points
                 motorsigns  = CDPR_Params.Gen_Params.MOTOR_SIGNS;         % Signs determining positive rotational direction
                 m_p         = CDPR_Params.Gen_Params.MASS_PLATFORM;       % Mass of MP
-                f_min = 0.2/R;
-                f_max = 0.6/R;
-                f_ref = 0.4/R;
-                w = [0 -m_p*.81 0]';
-                resolution = 100;
+                r_p = 0.012;
+                f_min = 15;
+                f_max = 80;
+                f_ref = (f_max +f_min)/2;
+                w = zeros(3,1);%[0 -m_p*.81 0]';
+                resolution = 50;
                 color = 'red';
-                TranslationWorkspace_V2(phi_0,a,b,m_p, f_min,f_max, f_ref, w, resolution, color)
+                TranslationWorkspace_V2(phi_0,a,b, f_min,f_max, f_ref, w, r_p, resolution, color)
 
             case 8
                 isError = checkForErrors(ODriveStruct,ODriveEnums);
