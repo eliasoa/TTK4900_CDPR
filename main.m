@@ -4,15 +4,17 @@ clear
 %% Add folders with functions to path
 % Name of the folder to add
 folderName = 'Functions';
+folderName2 = 'Temporary functions';
 
 % Get the current working directory
 currentDir = pwd;
 
 % Construct the full path to the folder
 folderPath = fullfile(currentDir, folderName);
-
+folderPath2 = fullfile(currentDir, folderName2);
 % Add the folder to the MATLAB path
 addpath(folderPath);
+addpath(folderPath2);
 
 %% Set up ASCII communication
 baudrate = 115200;
@@ -76,7 +78,7 @@ while true
                 userInput = input("Ensure that the MP is fastened at the origin with the drill bit. Type y when done: ", 's');
                 if userInput == 'y'
                     disp("Setting homing tension")
-                    T = [0.39; -0.39; 0.39; -0.39];
+                    T = [0.2; -0.2; 0.2; -0.2];
                     fieldNames = fieldnames(ODriveStruct);
                     for k = 1:length(fieldNames)
                         fieldName = fieldNames{k}; % Current field name as a string

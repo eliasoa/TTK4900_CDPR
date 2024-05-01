@@ -31,8 +31,8 @@ f_loss      = [2.195;2.295;2.245;1.845];
 
 
 %% Initialize variables
-x   = 0.3;                        % Desired x-position
-y   = -0.1;                          % Desired y-position
+x   = 0.2;                        % Desired x-position
+y   = 0;                          % Desired y-position
 phi = deg2rad(0);                            % Desired phi-angle [radians]
 
 q_d         = [x;y;phi];            % Desired pose
@@ -48,15 +48,18 @@ errorEncountered = false;           % Initialize error counter bit
 % Ki = zeros(3,1);
 % Kd = zeros(3,1);
 % 
-Tk = [9*0.07;0;0];
-% Kk = [500;0;0];
+% Tk = [0.5255;0.3458;0];
+% Kk = [500;450;10];
 % for i= 1:3
-%     Kp(i) = Kk(i)*0.45;
-%     Ki(i) = 1/(0.85*Tk(i));
+%     Kp(i) = Kk(i)*0.3;
+%     Ki(i) = Kp(i)/(0.85*Tk(i));
+%     Kd(i) = Kp(i)*Tk(i)*0.12;
 % end
 % 
 % Kp = diag(Kp);
 % Ki = diag(Ki);
+% Ki(3,3)=0;  % no I on angle
+% Kd = diag(Kd);
 
 e_int   = zeros(3,1);
 e_tol   = [0.5;0.5;0.5];
@@ -67,15 +70,21 @@ e_tol   = [0.5;0.5;0.5];
 % Kp = 0.6*diag([500*0.45 50 5]);
 % Ki = 0.5*diag([Kp(1)/(0.85*Tk(1)) 0 0]);
 
-Kp = diag([500*0.45 250 5]);
+% Kp = diag([100 100 10]);
 % Ki = diag([0 0 0]);
-Ki = 0.5*diag([Kp(1)/(0.85*Tk(1)) 0 0]);
-Kd = diag([0 0 0]);
+% Ki = 0.5*diag([Kp(1)/(0.85*Tk(1)) 0 0]);
+% Kd = diag([0 0 0]);
 
 % TODO  : FINN KRITISK FORSTERKNING FOR Y
 %       : TEST PI PÅ Y
 %       : TUNE PHI GAINS
 %       : evt: DERIVATVIRKNING
+
+%% ELIAS SIN PID
+
+Kp = diag([200; 200; 5]);
+Ki = diag([0;0;0]);
+Kd = diag([0 0 0]);
 
 %% Preallocation of vectors
 f_prev      = f_ref*ones(4,1);  % Memory Allocation for prev cable forces
@@ -156,7 +165,7 @@ t_loop = tic;
     A_pseudo    = pinv(A_t');
 
     % 
-    q_dot = -A_pseudo*l_dot
+    q_dot = -A_pseudo*l_dot;
 
     % Calculate Errors
     e           = q_d - q;
@@ -176,10 +185,11 @@ t_loop = tic;
     end
 
     % Desired wrench (TESTE KONTROLLER)
-    w_cP = Kp*e
-    w_cI = Ki*e_int
-    w_cD = Kd*e_dot
+    w_cP = Kp*e;
+    w_cI = Ki*e_int;
+    w_cD = Kd*e_dot;
     w_c =  w_cP + w_cI + w_cD
+    % w_c = PID_Fossen(e, e_dot,e_int)
     % tic
 
     % Force Allocation
@@ -190,7 +200,7 @@ t_loop = tic;
     (~(ones(4,1)&fix(vel*10^precV)/10^precV)...
     &any(fix(e*10^precE)/10^precE)).*f_static;
     % tmp = ones(4,1)&fix(vel*10^precV)/10^precV
-    f_f = f_s + f_loss;
+    f_f = f_s + f_loss
     
     % f0 = sign(A_pseudo*w_c)*f_f;
     lol = A_t_pseudo*w_c;
@@ -221,7 +231,7 @@ t_loop = tic;
    
 
     % Update Integral Error
-    e_int = e_int + e*toc(t_loop)
+    e_int = e_int + e*toc(t_loop);
 
     
     
