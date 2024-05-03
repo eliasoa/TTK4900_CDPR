@@ -58,14 +58,11 @@ while true
         switch number
 
             case 1
-
                 disp("Move with cursor mode")
                 disp("Press Esc to exit")
                 % arrowKey_manual_control(ODriveStruct, ODriveEnums, CDPR_Params);
                 % arrowKeyDebugger(CDPR_Params)
                 Plotting;
-
-                
 
             case 2
                 clc
@@ -95,15 +92,11 @@ while true
 
             case 3
                 disp("Set home position")
-                % Set home position
-                fieldNames = fieldnames(ODriveStruct);
-                for k = 1:length(fieldNames)
-                    fieldName = fieldNames{k}; % Current field name as a string
-                    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-                    setEncoderPositions(currentSerialPort);
-                end
-
-
+                % When manually resetting the encoders, the anticogging
+                % gets fucked, so have to do it manually
+                [p0, ~] = TEST_getEncoderReading(ODriveStruct);
+                CDPR_Params.Gen_Params.EncoderOffset = p0;
+                
             case 4
                 clc
                 disp("Clear errors")
@@ -133,10 +126,10 @@ while true
             case 7
                 disp("Check workspace")
                 % motorPosTest(ODriveStruct, ODriveEnums);
-                phi_0 =deg2rad(20);
+                phi_0 =deg2rad(0);
                 R           = CDPR_Params.Gen_Params.SpoolParams.SPOOL_RADIUS;        % Radius of spool
                 a           = CDPR_Params.SGM.FrameAP;                    % Frame Anchor Points
-                b           = CDPR_Params.SGM.BodyAP.TRAPEZOID;           % Body Anchor Points
+                % b           = CDPR_Params.SGM.BodyAP.TRAPEZOID;           % Body Anchor Points
                 motorsigns  = CDPR_Params.Gen_Params.MOTOR_SIGNS;         % Signs determining positive rotational direction
                 m_p         = CDPR_Params.Gen_Params.MASS_PLATFORM;       % Mass of MP
                 r_p = 0.012;
@@ -144,8 +137,14 @@ while true
                 f_max = 80;
                 f_ref = (f_max +f_min)/2;
                 w = zeros(3,1);%[0 -m_p*.81 0]';
-                resolution = 50;
+                resolution = 100;
                 color = 'red';
+
+                b               = [ -0.0250   -0.0750    0.0750    0.0250;
+                                    -0.0100    0.0100    0.0100   -0.0100];
+                % b               = [ -0.0750   -0.0750    0.0750    0.0750;
+                %                     -0.0750    0.0750    0.0750   -0.0750];
+
                 TranslationWorkspace_V2(phi_0,a,b, f_min,f_max, f_ref, w, r_p, resolution, color)
 
             case 8
@@ -170,6 +169,8 @@ while true
                     setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, currentSerialPort)
                     % pause(0.1)
                 end
+            case 10
+                test(ODriveStruct, ODriveEnums, CDPR_Params)
 
 
             otherwise

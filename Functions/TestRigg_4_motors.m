@@ -31,12 +31,15 @@ f_loss      = [2.195;2.295;2.245;1.845];
 
 
 %% Initialize variables
-x   = 0.2;                        % Desired x-position
+x   = 0.3;                        % Desired x-position
 y   = 0;                          % Desired y-position
 phi = deg2rad(0);                            % Desired phi-angle [radians]
 
 q_d         = [x;y;phi];            % Desired pose
 q           = [0;0;0];
+q_d_square = [0 0.2  0.2 0 -0.2 -0.2 0;
+    0 0   -0.2 -0.2 -0.2  0   0;
+    0 0    0   0  0    0   0];
 
 l0 = [1.2260 1.1833 1.1833 1.2260]';
 
@@ -47,7 +50,7 @@ errorEncountered = false;           % Initialize error counter bit
 % Kp = zeros(3,1);
 % Ki = zeros(3,1);
 % Kd = zeros(3,1);
-% 
+%
 % Tk = [0.5255;0.3458;0];
 % Kk = [500;450;10];
 % for i= 1:3
@@ -55,14 +58,14 @@ errorEncountered = false;           % Initialize error counter bit
 %     Ki(i) = Kp(i)/(0.85*Tk(i));
 %     Kd(i) = Kp(i)*Tk(i)*0.12;
 % end
-% 
+%
 % Kp = diag(Kp);
 % Ki = diag(Ki);
 % Ki(3,3)=0;  % no I on angle
 % Kd = diag(Kd);
 
 e_int   = zeros(3,1);
-e_tol   = [0.5;0.5;0.5];
+e_tol   = [10;0.5;0.5];
 
 
 
@@ -82,7 +85,7 @@ e_tol   = [0.5;0.5;0.5];
 
 %% ELIAS SIN PID
 
-Kp = diag([200; 200; 5]);
+Kp = diag([150; 150; 5]);
 Ki = diag([0;0;0]);
 Kd = diag([0 0 0]);
 
@@ -98,8 +101,8 @@ theta_m_dot = zeros(4,1);
 pos_rad     = zeros(4,1);
 vel         = zeros(4,1);
 
-%% Logging 
-iter = 100;
+%% Logging
+iter = 200
 total_time  = zeros(1,iter);
 count       = 1;
 timeVec     = zeros(1,iter);
@@ -108,8 +111,8 @@ timeSca     = 0;
 
 q_log       = zeros(3,iter);
 qd_log      = zeros(3,iter);
-e_log       = zeros(3,iter);    
-e_int_log   = zeros(3,iter);   
+e_log       = zeros(3,iter);
+e_int_log   = zeros(3,iter);
 
 %% Sine testing - ellipse
 omega = 3;
@@ -126,12 +129,15 @@ fieldNames = fieldnames(ODriveStruct);
 %% Control Loop
 s_start = tic;
 while errorEncountered == false && count <= iter
-t_loop = tic;
+    t_loop = tic;
     %% Estimate Cable Lengths
     % Get position and velocity of motors
     [pos, vel] = TEST_getEncoderReading(ODriveStruct);
-    
-    for k = 1:4      
+
+    pos = EncoderOffset(pos, CDPR_Params.Gen_Params.EncoderOffset);
+
+
+    for k = 1:4
         pos_rad(k) = pos(k)*2*pi;
         l_enc(k) = pos_rad(k)*R*motorsigns(k);
         l(k) = l0(k) + l_enc(k);
@@ -147,12 +153,12 @@ t_loop = tic;
     %% Controller
     % Calculate current and desired pose of the platform
     q_0 = init_fk_estimate(a,b,l_fk);
-    q = p_forward_kinematics(a,b,l_fk,q_0,r_p);
-
+    q = p_forward_kinematics(a,b,l_fk,q_0,r_p)
+    % pos
 
     % % Test sine
     bla = toc(s_start);
-    % q_d         = [Lx*sin(omega*bla);Ly*cos(omega*bla)-0.05;phi];            % Desired pose
+    q_d         = [Lx*sin(omega*bla);Ly*cos(omega*bla)-0.05;phi];            % Desired pose
     % q_d         = [0;Ly*cos(omega*bla);phi];
     % q_d         = [Lx*sin(omega*bla);0;phi];
 
@@ -161,17 +167,36 @@ t_loop = tic;
     % Calculate Structure Matrix
     [~,betar]   = p_inverse_kinematics(a,b,q, r_p);
     A_t         = structure_matrix(a,b,q,r_p,betar);
-    A_t_pseudo  = pinv(A_t); 
+    A_t_pseudo  = pinv(A_t);
     A_pseudo    = pinv(A_t');
 
-    % 
+    %
     q_dot = -A_pseudo*l_dot;
 
+
+    % Elias sin carzy qd
+    % if count < 100
+    %     q_d = [q_d_square(1,1);q_d_square(2,1); q_d_square(3,1)];
+    % elseif (100 <= count) && count < 200
+    %     q_d = [q_d_square(1,2);q_d_square(2,2); q_d_square(3,2)];
+    % elseif (200 <= count) && count < 300
+    %     q_d = [q_d_square(1,3);q_d_square(2,3); q_d_square(3,3)];
+    % elseif (300 <= count) && count < 400
+    %     q_d = [q_d_square(1,4);q_d_square(2,4); q_d_square(3,4)];
+    % elseif (400 <= count) && count < 500
+    %     q_d = [q_d_square(1,5);q_d_square(2,5); q_d_square(3,5)];
+    % elseif (500 <= count) && count < 600
+    %     q_d = [q_d_square(1,6);q_d_square(2,6); q_d_square(3,6)];
+    % elseif (600 <= count) && count < 700
+    %     q_d = [q_d_square(1,7);q_d_square(2,7); q_d_square(3,7)];
+    % end
+    q_d
     % Calculate Errors
-    e           = q_d - q;
+    e           = q_d - q
     e_dot       = q_dot;
 
-     % Anti Theft System
+
+    % Anti Theft System
     if sign(e_int(1))*e_int(1) > e_tol(1)
         e_int(1) = e_tol(1)*sign(e_int(1));
     end
@@ -191,28 +216,35 @@ t_loop = tic;
     w_c =  w_cP + w_cI + w_cD
     % w_c = PID_Fossen(e, e_dot,e_int)
     % tic
+    % w_c = [0 0 0]';
 
     % Force Allocation
     [f,~,flag] = ForceAllocIterativeSlack(A_t',f_min,f_max,f_ref,f_prev,w_c);
+    % [f, flag] = Optimal_ForceDistributions(A_t',w_c,0,f_min,f_max,f_ref, f_prev);
+    % A_T_Pinv = pinv(A_t);
+    % f_ref = (f_min + f_max)/2;
+    % f = f_ref*ones(4,1) - A_T_Pinv*(w_c + A_t*f_ref*ones(4,1));
 
     
-    f_s = ...
-    (~(ones(4,1)&fix(vel*10^precV)/10^precV)...
-    &any(fix(e*10^precE)/10^precE)).*f_static;
-    % tmp = ones(4,1)&fix(vel*10^precV)/10^precV
-    f_f = f_s + f_loss
-    
-    % f0 = sign(A_pseudo*w_c)*f_f;
-    lol = A_t_pseudo*w_c;
-    f0 = sign(fix((lol)*10^precF)/10^precF).*f_f;
- 
+    %
+    % f_s = ...
+    % (~(ones(4,1)&fix(vel*10^precV)/10^precV)...
+    % &any(fix(e*10^precE)/10^precE)).*f_static;
+    % % tmp = ones(4,1)&fix(vel*10^precV)/10^precV
+    % f_f = f_s + f_loss
+    %
+    % % f0 = sign(A_pseudo*w_c)*f_f;
+    % lol = A_t_pseudo*w_c;
+    % f0 = sign(fix((lol)*10^precF)/10^precF).*f_f;
 
-    T = (f+f0)*R.*motorsigns*(-1); % fordi motorsigns er for endring i kabelendring og ikke rotasjonsretning på torque
+    % T = (f+f0)*R.*motorsigns*(-1); % fordi motorsigns er for endring i kabelendring og ikke rotasjonsretning på torque
+
+    T = (f)*R.*motorsigns*(-1);
+
     % tic
     % offset = ~(ones(4,1)&(fix(vel*10^precV)/10^precV|~(fix(T*10^precT)/10^precT))).*sign(T).*T_s;
     % t_sol = toc
     % T = T + offset;
-
 
     % Write torque to motor drivers (YOOOO: CHECK POSITIV REGNING)
     for k = 1:length(fieldNames)
@@ -226,22 +258,14 @@ t_loop = tic;
         f_prev = f;
     end
 
-    % time_test = time_test + h_test;
-
-   
-
     % Update Integral Error
     e_int = e_int + e*toc(t_loop);
 
-    
-    
     % Logging
-    % total_time(count)   = toc(t_loop);
     q_log(:,count)      = q;
     qd_log(:,count)     = q_d;
-    e_log(:,count)      = e; 
-    e_int_log(:,count)  = e_int; 
-    
+    e_log(:,count)      = e;
+    e_int_log(:,count)  = e_int;
 
     % Fixed sampling time
     % time_diff = ref_time - toc(t_loop);
@@ -273,11 +297,10 @@ xlabel({'Iteration number'});
 title({'Loop frequency'});
 hold off
 T = [0.2;-0.2;0.2;-0.2];
-    for k = 1:length(fieldNames)
-        fieldName = fieldNames{k}; % Current field name as a string
-        currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-        setMotorTorque(T(k), currentSerialPort);
-    end
-
+for k = 1:length(fieldNames)
+    fieldName = fieldNames{k}; % Current field name as a string
+    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
+    setMotorTorque(T(k), currentSerialPort);
+end
 
 end

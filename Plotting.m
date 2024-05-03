@@ -79,14 +79,13 @@ tIter = linspace(1,iterations,iterations);
 % xlabel("Iteration Number", "Interpreter","latex")
 % ylabel("Orientation (deg)", "Interpreter","latex")
 
-%  
-% figure(3)
-% subplot(2,1,1)
-% plot(q(1,:), q(2,:), qd(1,:), qd(2,:))
-% legend("Pose", "Desired Pose")
-% xlim([-0.7, 0.7])
-% ylim([-0.5, 0.5])
-% grid on;
+
+figure(3)
+plot(q(1,:), q(2,:), qd(1,:), qd(2,:))
+legend("Pose", "Desired Pose")
+xlim([-0.7, 0.7])
+ylim([-0.5, 0.5])
+grid on;
 
 
 figure(1)

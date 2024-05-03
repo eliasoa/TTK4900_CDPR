@@ -73,8 +73,15 @@ xlabel('X-axis');
 ylabel('Y-axis');
 title('Translation Workspace, with $$\phi _0 = $$ ' + string(rad2deg(phi_0)) + ' degrees', 'Interpreter','latex');
 
+% Plotting the shape created by points in matrix 'b'
+hold on; % Keep the current plot
+plot([b(1,:), b(1,1)], [b(2,:), b(2,1)], 'k-o', 'LineWidth', 2); % Plot shape as a closed loop
+hold off;
+
+
+
 % Optionally, set axis limits based on the matrix size
-axis([-x_dim/2, x_dim/2, -y_dim/2, y_dim/2]);
+axis([-0.5, 0.5, -0.5, 0.5]);
 
 % % Displaying the matrix where 1s are plotted and adjusting the axes
 % imagesc(y_grid,x_grid, f_positive);

@@ -200,6 +200,9 @@ motorsign3 = 1;
 
 motorsigns = [motorsign0;motorsign1;motorsign2;motorsign3];
 
+% Encoder offset, for zeroing home position
+p0 = zeros(4,1);
+
 
 
 %% Structs
@@ -234,7 +237,8 @@ CDPR_SystemMatrices = struct("A_c_aug", A_c_aug, ...
 CDPR_GenParams = struct("SAMPLING_TIME", h, ...
                         "MASS_PLATFORM", mp, ...
                         "MOTOR_SIGNS", motorsigns, ...
-                        "SpoolParams", CDPR_SpoolParams);
+                        "SpoolParams", CDPR_SpoolParams, ...
+                        "EncoderOffset", p0);
 % More?
 
 
