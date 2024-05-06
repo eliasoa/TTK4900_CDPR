@@ -8,7 +8,7 @@ a           = CDPR_Params.SGM.FrameAP;                    % Frame Anchor Points
 b           = CDPR_Params.SGM.BodyAP.TRAPEZOID;           % Body Anchor Points
 motorsigns  = CDPR_Params.Gen_Params.MOTOR_SIGNS;         % Signs determining positive rotational direction
 % m_p         = CDPR_Params.Gen_Params.Platform_mass;       % Mass of MP
-f_min = 15;
+f_min = 10;
 f_max = 80;
 f_ref = (f_max +f_min)/2;
 

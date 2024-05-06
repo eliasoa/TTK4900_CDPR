@@ -100,7 +100,7 @@ for j = 1:5
             % Log Values
             TorqueLog(k,i)  = MotorTorques(k);
             VelLog(k,i)     = fix(vel(k)*10^prec)/10^prec; %vel(k);
-            pause(0.01)
+            pause(0.51)
         end
         pause(0.3)
 
@@ -117,6 +117,10 @@ for j = 1:5
     logg(:,j) = TorqueLog(:,i-1);
     flag = zeros(4,1);
     pause(1)
+
+       % Save logs for this iteration
+        save(['TorqueLog_' num2str(j) '.mat'], 'TorqueLog');
+        save(['VelLog_' num2str(j) '.mat'], 'VelLog');
 end
 % Set motors to idle
 for k = 1:length(fieldNames)
