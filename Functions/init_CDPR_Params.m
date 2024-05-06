@@ -201,7 +201,7 @@ motorsign3 = 1;
 motorsigns = [motorsign0;motorsign1;motorsign2;motorsign3];
 
 % Encoder offset, for zeroing home position
-p0 = zeros(4,1);
+p0 = [-2.1642; 2.8214; 2.2264; -3.0757];
 
 
 
