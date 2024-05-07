@@ -22,27 +22,22 @@ addpath(folderPath2);
 baudrate = 115200;
 timeout = 1;
 ODriveStruct = initSerialPorts(baudrate, timeout);
+fieldNames = fieldnames(ODriveStruct);
 
 %% Memory Allocation
-N = 30;
+N = 50;
 TorqueLog   = zeros(4,N);
 VelLog      = zeros(4,N);
 count = 1;
+
+torqueDecrease = 0.001;
+prec = .1;
 
 %% Generate structs with ODrive modes and error codes (enum from Arduino)
 % Each struct has to be passed as an argument if they need to be used in a
 % function
 init_ODriveEnums;
 init_CDPR_Params;
-
-% Reset encoder zeros
-fieldNames = fieldnames(ODriveStruct);
-for k = 1:length(fieldNames)
-    fieldName = fieldNames{k}; % Current field name as a string
-    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-    setEncoderPositions(currentSerialPort);
-end
-average = zeros(4,4);
 
 
 for j = 1:5
@@ -52,14 +47,13 @@ for j = 1:5
         currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
         setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, currentSerialPort)
         pause(0.1)
-        setMotorTorque(1,currentSerialPort)
+        setMotorTorque(0.7,currentSerialPort)
     end
     vel = zeros(4,1);
     DynamicalTorques = zeros(4,1);
-    MotorTorques = 0.04*ones(4,1);
+    MotorTorques = 0.06*ones(4,1);
     flag = zeros(4,1);
-    torqueDecrease = 0.001;
-    prec = .1;
+
 
     while ~(all(flag))
 
@@ -92,18 +86,18 @@ for j = 1:5
         setAxisState(ODriveEnums.AxisState.AXIS_STATE_IDLE, currentSerialPort)
     end
     logg(:,j) = TorqueLog(:,count-1);
-       % Save logs for this iteration
+    % Save logs for this iteration
     save(['TorqueLog_' num2str(j) '.mat'], 'TorqueLog');
     save(['VelLog_' num2str(j) '.mat'], 'VelLog');
 
 end
 %%
 average = mean(logg,2)
-save('DynamicalTorqueAvg','average');
+save('DynamicTorque/DynamicalTorqueAvg','average');
 
 %% Plotting
 
-save("DynamicalTorque.mat", "TorqueLog", "VelLog");
+save("DynamicTorque/DynamicalTorque.mat", "TorqueLog", "VelLog");
 
 
 

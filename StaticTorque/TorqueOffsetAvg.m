@@ -30,19 +30,10 @@ init_CDPR_Params;
 
 %% Params
 N = 50;
-torqueIncrement = 0.01;
+torqueIncrement = 0.001;
 prec = .1;
 
 logg = zeros(4,5);
-
-%% Torque Calibration
-% Reset encoder zeros
-fieldNames = fieldnames(ODriveStruct);
-for k = 1:length(fieldNames)
-    fieldName = fieldNames{k}; % Current field name as a string
-    currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
-    setEncoderPositions(currentSerialPort);
-end
 
 for j = 1:5
     % Turn motors on
@@ -50,23 +41,19 @@ for j = 1:5
         fieldName = fieldNames{k}; % Current field name as a string
         currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
         setAxisState(ODriveEnums.AxisState.AXIS_STATE_CLOSED_LOOP_CONTROL, currentSerialPort)
-
     end
 
     % Memory Allocation
     TorqueLog   = zeros(4,N);
     VelLog      = zeros(4,N);
-    MotorTorques = zeros(4,1);
+    MotorTorques = 0.03*ones(4,1);
     TorqueOffset = zeros(4,1);
     flag = zeros(4,1);
     vel = zeros(4,1);
 
     maxiter = 50;
     i = 1;
-    while ~(all(flag) == 1) && i < maxiter
-        % end
-        % for i= 1:N
-
+    while ~(all(flag)) && i < maxiter
         for k = 1:length(fieldNames)
             fieldName = fieldNames{k}; % Current field name as a string
             currentSerialPort = ODriveStruct.(fieldName); % Access the current serial port using dynamic field names
@@ -83,16 +70,9 @@ for j = 1:5
                 normalvel = vel(k)
                 disp('~~~~~~~~')
             elseif flag(k) == 0
-                % k
-                % i
+
                 MotorTorques(k) = MotorTorques(k) + torqueIncrement;    % Increment torque
             end
-
-            % if fix(vel(k)*10^prec)/10^prec == 0
-            %     MotorTorques(k) = MotorTorques(k) + torqueIncrement;    % Increment torque
-            % else
-            %     TorqueOffset(k) = MotorTorques(k);
-            % end
 
             % Set motor Torques
             setMotorTorque(MotorTorques(k), currentSerialPort);
@@ -100,9 +80,9 @@ for j = 1:5
             % Log Values
             TorqueLog(k,i)  = MotorTorques(k);
             VelLog(k,i)     = fix(vel(k)*10^prec)/10^prec; %vel(k);
-            pause(0.51)
+            pause(0.25)
         end
-        pause(0.3)
+        % pause(0.5)
 
         i = i+1;
     end
@@ -132,4 +112,4 @@ end
 
 
 offset = mean(logg,2);
-save('offset',"offset")
+save('StaticTorqueAverage',"offset")

@@ -1,5 +1,5 @@
 % Define the filename of the CSV file
-filename = "ODrive2/Up05.csv";
+filename = "1kg/ODrive2/Down05.csv";
 
 % Read the CSV file into a table
 data = readtable(filename);
@@ -20,23 +20,25 @@ ODrive2Current = data.ODrive2Current;
 ODrive3Current = data.ODrive3Current;
 
 Tq = 8.27/150;
-figure(1)
+x0 = 0
+x1 = inf
 
+figure(1)
 subplot(3,1,1)
 plot(time,ODrive2Position)
-% xlim([175 200])
+xlim([x0 x1])
 subplot(3,1,2)
 plot(time,ODrive2Current*Tq);
-% xlim([175 200])
+xlim([x0 x1])
 title("torqs")
 subplot(3,1,3)
 plot(time,ODrive2Velocity);
 title("vel")
 % ylim([-3 0.6])
-% xlim([6 9.5])
+xlim([x0 x1])
 
 t = 17.4;
 % 722
 % 4158
 %%
-averageValue = mean(ODrive2Current(1287:1820)*Tq)
+averageValue = mean(ODrive2Current(319:881)*Tq)
