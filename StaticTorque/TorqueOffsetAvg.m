@@ -111,5 +111,5 @@ end
 
 
 
-offset = mean(logg,2);
-save('StaticTorqueAverage',"offset")
+StaticTorqueAverage = mean(logg,2);
+save('StaticTorqueAverage',"StaticTorqueAverage")

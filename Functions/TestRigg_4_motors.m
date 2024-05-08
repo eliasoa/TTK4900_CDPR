@@ -87,7 +87,7 @@ e_tol   = [10;0.5;0.5];
 
 %% ELIAS SIN PID
 
-Kp = diag([150; 150; 5]);
+Kp = diag([100; 100; 5]);
 Ki = diag([0;0;0]);
 Kd = diag([0 0 0]);
 
@@ -161,6 +161,7 @@ while errorEncountered == false && count <= iter
     % % Test sine
     bla = toc(s_start);
     q_d         = [Lx*sin(omega*bla);Ly*cos(omega*bla)-0.05;phi];            % Desired pose
+    q_d_dot     = [-Lx*cos(omega*bla); Ly*sin(omega*bla); 0];
     % q_d         = [0;Ly*cos(omega*bla);phi];
     % q_d         = [Lx*sin(omega*bla);0;phi];
 
@@ -173,7 +174,7 @@ while errorEncountered == false && count <= iter
     A_pseudo    = pinv(A_t');
 
     %
-    q_dot = -A_pseudo*l_dot;
+    q_dot = -A_pseudo*l_dot
 
 
     % Elias sin carzy qd
@@ -195,7 +196,7 @@ while errorEncountered == false && count <= iter
     q_d
     % Calculate Errors
     e           = q_d - q
-    e_dot       = q_dot;
+    e_dot       = q_d_dot - q_dot
 
 
     % Anti Theft System
@@ -240,8 +241,13 @@ while errorEncountered == false && count <= iter
     % f0 = sign(fix((lol)*10^precF)/10^precF).*f_f;
 
     % T = (f+f0)*R.*motorsigns*(-1); % fordi motorsigns er for endring i kabelendring og ikke rotasjonsretning på torque
+    f_friction = zeros(4,1);
 
-    T = (f)*R.*motorsigns*(-1);
+    for i = 1:4
+        f_friction(i) = FrictionModel(i-1,vel(i));
+    end
+
+    T = (f+f_friction)*R.*motorsigns*(-1);
 
     % tic
     % offset = ~(ones(4,1)&(fix(vel*10^precV)/10^precV|~(fix(T*10^precT)/10^precT))).*sign(T).*T_s;

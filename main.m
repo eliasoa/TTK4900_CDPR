@@ -111,8 +111,8 @@ while true
                 % [L0,l0, A_transposed] = CDPR_InverseKinematics_V2([0;0;0], a, b)
                 % l0 = [0.8228;0.7798;0.7798;0.8228];
                 % q = DirectKinematics_V2(a,b,l0)
-                TestRigg_4_motors(ODriveStruct, ODriveEnums, CDPR_Params);
-
+                % TestRigg_4_motors(ODriveStruct, ODriveEnums, CDPR_Params);
+                testing(ODriveStruct,CDPR_Params);
             case 6
                 disp("Enable enable_dc_bus_voltage_feedback on all ODrives")
                 % calibrateMotor(ODriveStruct.ODrive0,ODriveEnums)
