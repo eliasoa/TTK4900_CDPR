@@ -7,9 +7,3 @@ end
 
 figure(51)
 plot(velt, balle)
-
-% figure(50)
-% plot([0,0]); hold on;
-% plot([1,1])
-% plot([2,2])
-% plot([3,3]); hold off;

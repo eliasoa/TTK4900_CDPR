@@ -37,7 +37,13 @@ e_int_log       = zeros(3,iter);
 f_log           = zeros(4,iter);
 T_friction_log  = zeros(4,iter);
 vel_log         = zeros(4,iter);
-fvel_log         = zeros(4,iter);
+fvel_log        = zeros(4,iter);
+
+f_uncon_log     = zeros(4,iter);
+f_friction_log  = zeros(4,iter);
+w_friction_log  = zeros(3,iter);
+
+w_c_log         = zeros(3,iter);
 
 
 % l0 = [1.2260 1.1833 1.1833 1.2260]';
@@ -58,7 +64,6 @@ fieldNames = fieldnames(ODriveStruct);
 s_start = tic;
 while count <= iter
     t_loop = tic;
-
     [pos, vel] = TEST_getEncoderReading(ODriveStruct);
     pos_n = EncoderOffset(pos, p0);
     pos_rad = pos_n*2*pi;
@@ -92,6 +97,9 @@ while count <= iter
     w_cI = Ki*e_int;
     w_cD = Kd*e_dot;
     w_c =  w_cP + w_cI + w_cD;
+    w_c = [15;0;0];
+    
+    f_uncon = A_t_pinv*w_c;
 
     % Force Allocation
     [f,~,flag] = ForceAllocIterativeSlack(A_t',f_min,f_max,f_ref,f_prev,w_c);
@@ -101,19 +109,24 @@ while count <= iter
         % if i==4
             % T_friction(i) = FrictionModel(i-1,fvel3);
         % else
-            T_friction(i) = FrictionModel(i-1,fvel(i)*motorsigns(i));
-            % T_friction(i) = T_friction(i)*motorsigns(i);
+            T_friction(i) = FrictionModel(i-1,fvel(i));
+            T_friction_signed(i) = T_friction(i)*motorsigns(i);
         % end
         
     end
+    f_friction = T_friction./R;
+    f_friction_signed = T_friction_signed./R;
+    w_friction = -A_t*f_friction;
+  
     T_s = ...
     sign(A_t_pinv*w_c).*(~(ones(4,1)&fix(fvel*10^3)/10^3)...
     &any(fix(e*10^3)/10^3)).*t_static
     % fix(vel*10^3)/10^3
     % any(fix(e*10^3)/10^3)
     % (ones(4,1)&fix(vel*10^1)/10^1)
-    T = ((f)*R+T_friction+T_s).*motorsigns*(-1);
-    % T = (f*R).*motorsigns*(-1);
+    % T = ((f)*R+T_friction+T_s).*motorsigns*(-1);
+    % T = ((f)*R).*motorsigns*(-1);
+    T = (f*R).*motorsigns*(-1);
 
     % Write torque to motor drivers (YOOOO: CHECK POSITIV REGNING)
     for k = 1:length(fieldNames)
@@ -137,6 +150,13 @@ while count <= iter
     vel_log(:,count)    = vel;    
     fvel_log(:,count)   = fvel;    
 
+    f_uncon_log(:,count) = f_uncon;
+    f_friction_log(:,count) = f_friction;
+    f_friction_signed_log(:,count) = f_friction_signed;
+    w_friction_log(:, count) = w_friction;
+    
+    w_c_log(:,count) = w_c;
+
     total_time(count)   = toc(t_loop);
     timeSca = timeSca + total_time(count);
     timeVec(count) = timeSca;
@@ -145,7 +165,7 @@ while count <= iter
 end
 
 %% Save logged data
-save("PlotData/PoseData.mat", "q_log","qd_log","e_log","e_int_log","f_log","T_friction_log", "timeVec", "vel_log", "fvel_log");
+save("PlotData/PoseData.mat", "q_log","qd_log","e_log","e_int_log","f_log","T_friction_log","f_uncon_log","f_friction_log","f_friction_signed_log", "w_friction_log", "w_c_log", "timeVec", "vel_log", "fvel_log");
 % Plot of total time and Hertz
 % figure(1)
 % subplot(2,1,1)

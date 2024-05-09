@@ -10,6 +10,11 @@ T_friction  = Data.T_friction_log;
 timeVec     = Data.timeVec;
 vel         = Data.vel_log;
 fvel        = Data.fvel_log;
+f_uncon     = Data.f_uncon_log;
+f_friction  = Data.f_friction_log;
+f_friction_signed = Data.f_friction_signed_log;
+w_friction  = Data.w_friction_log;
+w_c         = Data.w_c_log;
 
 iterations    = length(q);
 tIter = linspace(1,iterations,iterations);
@@ -202,7 +207,6 @@ xlabel("Velocity","Interpreter","latex")
 ylabel("Force", "Interpreter","latex")
 
 figure(11)
-
 subplot(2,2,3)
 plot(timeVec, vel(1,:)); hold on;
 plot(timeVec, fvel(1,:)); hold off;
@@ -234,6 +238,28 @@ title("ODrive3", "Interpreter","latex")
 xlabel("Time","Interpreter","latex")
 ylabel("Velocity", "Interpreter","latex")
 legend('Unfiltered','Filtered')
+%%
+figure(12)
+plot(timeVec,w_friction(1,:)+w_c(1,:))
+legend("$w_{fric,x}$","$w_y$","$\tau_z$","Interpreter", "latex")
 
+figure(13)
+plot(timeVec, w_c(1,:))
+legend("$w_x$","$w_y$","$\tau_z$","Interpreter", "latex")
+%%
+cable = 1;
+figure(14)
+hold on
+plot(tIter,f(cable,:))
+plot(tIter,f_friction(cable,:))
+% plot(tIter,f_friction_signed(cable,:),'--')
+hold off
 
+cable = 2;
+figure(15)
+hold on
+plot(timeVec,f(cable,:))
+plot(timeVec,f_friction(cable,:))
+% plot(timeVec,f_friction_signed(cable,:),'--')
+hold off
 
