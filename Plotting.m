@@ -9,33 +9,35 @@ f           = Data.f_log;
 T_friction  = Data.T_friction_log;
 timeVec     = Data.timeVec;
 vel         = Data.vel_log;
+fvel        = Data.fvel_log;
 
 iterations    = length(q);
 tIter = linspace(1,iterations,iterations);
 
 %% Plot of pose and desired pose
-
-figure(1)
-subplot(3,1,1)
-plot(tIter , q(1,:), tIter ,qd(1,:));
-title("Plot of x", "Interpreter", "latex")
-legend("x", "$x_d$","Interpreter", "latex")
-xlabel("Iteration Number", "Interpreter","latex")
-ylabel("Position (m)", "Interpreter","latex")
-
-subplot(3,1,2)
-plot(tIter , q(2,:), tIter ,qd(2,:));
-title("Plot of y", "Interpreter", "latex")
-legend("y", "$y_d$","Interpreter", "latex")
-xlabel("Iteration Number", "Interpreter","latex")
-ylabel("Position (m)", "Interpreter","latex")
-
-subplot(3,1,3)
-plot(tIter , rad2deg(q(3,:)), tIter, rad2deg(qd(3,:)) );
-title("Plot of $\phi$", "Interpreter", "latex")
-legend("$\phi$", "$\phi _d$","Interpreter", "latex")
-xlabel("Iteration Number", "Interpreter","latex")
-ylabel("Angle (deg)", "Interpreter","latex")
+close all;
+%% x axis: Iteration number
+% figure(1)
+% subplot(3,1,1)
+% plot(tIter , q(1,:), tIter ,qd(1,:));
+% title("Plot of x", "Interpreter", "latex")
+% legend("x", "$x_d$","Interpreter", "latex")
+% xlabel("Iteration Number", "Interpreter","latex")
+% ylabel("Position (m)", "Interpreter","latex")
+% 
+% subplot(3,1,2)
+% plot(tIter , q(2,:), tIter ,qd(2,:));
+% title("Plot of y", "Interpreter", "latex")
+% legend("y", "$y_d$","Interpreter", "latex")
+% xlabel("Iteration Number", "Interpreter","latex")
+% ylabel("Position (m)", "Interpreter","latex")
+% 
+% subplot(3,1,3)
+% plot(tIter , rad2deg(q(3,:)), tIter, rad2deg(qd(3,:)) );
+% title("Plot of $\phi$", "Interpreter", "latex")
+% legend("$\phi$", "$\phi _d$","Interpreter", "latex")
+% xlabel("Iteration Number", "Interpreter","latex")
+% ylabel("Angle (deg)", "Interpreter","latex")
 
 % figure(2)
 % subplot(3,1,1)
@@ -59,7 +61,6 @@ ylabel("Angle (deg)", "Interpreter","latex")
 % xlabel("Iteration Number", "Interpreter","latex")
 % ylabel("Orientation (deg)", "Interpreter","latex")
 
-
 % figure(3)
 % subplot(3,1,1)
 % plot(tIter, e_int(1,:));
@@ -82,14 +83,12 @@ ylabel("Angle (deg)", "Interpreter","latex")
 % xlabel("Iteration Number", "Interpreter","latex")
 % ylabel("Orientation (deg)", "Interpreter","latex")
 
-
 figure(4)
 plot(q(1,:), q(2,:), qd(1,:), qd(2,:))
 legend("Pose", "Desired Pose")
 xlim([-0.7, 0.7])
 ylim([-0.5, 0.5])
 grid on;
-
 
 figure(5)
 subplot(3,1,1)
@@ -171,56 +170,70 @@ figure(9)
 subplot(2,1,1)
 hold on
 plot(timeVec,f);
+legend('$f_1$','$f_2$','$f_3$','$f_4$',"Interpreter", "latex")
 subplot(2,1,2)
 plot(timeVec,T_friction)
+legend('$f_1$','$f_2$','$f_3$','$f_4$',"Interpreter", "latex")
 
 figure(10)
 title("Friction vs Velocity ")
+subplot(2,2,3)
+plot(fvel(1,:), T_friction(1,:), 'o')
+title("ODrive0")
+xlabel("Velocity","Interpreter","latex")
+ylabel("Force", "Interpreter","latex")
+
 subplot(2,2,1)
-plot(vel(1,:), T_friction(1,:), 'o')
+plot(fvel(2,:), T_friction(2,:),'o')
+title("ODrive1")
 xlabel("Velocity","Interpreter","latex")
 ylabel("Force", "Interpreter","latex")
 
 subplot(2,2,2)
-plot(vel(2,:), T_friction(2,:),'o')
-xlabel("Velocity","Interpreter","latex")
-ylabel("Force", "Interpreter","latex")
-
-subplot(2,2,3)
-plot(vel(3,:), T_friction(3,:),'o')
+plot(fvel(3,:), T_friction(3,:),'o')
+title("ODrive2")
 xlabel("Velocity","Interpreter","latex")
 ylabel("Force", "Interpreter","latex")
 
 subplot(2,2,4)
-plot(vel(4,:), T_friction(4,:),'o')
+plot(fvel(4,:), T_friction(4,:),'o')
+title("ODrive3")
 xlabel("Velocity","Interpreter","latex")
 ylabel("Force", "Interpreter","latex")
 
 figure(11)
 
-subplot(2,2,1)
-plot(timeVec, vel(1,:))
+subplot(2,2,3)
+plot(timeVec, vel(1,:)); hold on;
+plot(timeVec, fvel(1,:)); hold off;
 title("ODrive0", "Interpreter","latex")
 xlabel("Time","Interpreter","latex")
 ylabel("Velocity", "Interpreter","latex")
+legend('Unfiltered','Filtered')
 
-subplot(2,2,2)
-plot(timeVec, vel(2,:))
+subplot(2,2,1)
+plot(timeVec, vel(2,:)); hold on;
+plot(timeVec, fvel(2,:)); hold off;
 title("ODrive1", "Interpreter","latex")
 xlabel("Time","Interpreter","latex")
 ylabel("Velocity", "Interpreter","latex")
+legend('Unfiltered','Filtered')
 
-subplot(2,2,3)
-plot(timeVec, vel(3,:))
+subplot(2,2,2)
+plot(timeVec, vel(3,:)); hold on;
+plot(timeVec, fvel(3,:)); hold off;
 title("ODrive2", "Interpreter","latex")
 xlabel("Time","Interpreter","latex")
 ylabel("Velocity", "Interpreter","latex")
+legend('Unfiltered','Filtered')
 
 subplot(2,2,4)
-plot(timeVec, vel(4,:))
+plot(timeVec, vel(4,:)); hold on;
+plot(timeVec, fvel(4,:)); hold off;
 title("ODrive3", "Interpreter","latex")
 xlabel("Time","Interpreter","latex")
 ylabel("Velocity", "Interpreter","latex")
+legend('Unfiltered','Filtered')
 
 
 
