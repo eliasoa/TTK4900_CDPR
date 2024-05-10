@@ -71,7 +71,7 @@ grid on;
 % Set axis labels and title
 xlabel('X-axis');
 ylabel('Y-axis');
-title('Translation Workspace, with $$\phi _0 = $$ ' + string(rad2deg(phi_0)) + ' degrees', 'Interpreter','latex');
+title('Translation Workspace, with $$\phi _0 = $$ ' + string(rad2deg(phi_0)) + ' degrees, $$w_{ref} = [$$'+ string(w(1)) + ',' + string(w(2)) + ',' + string(w(3)) + ']', 'Interpreter','latex');
 
 % Plotting the shape created by points in matrix 'b'
 hold on; % Keep the current plot
