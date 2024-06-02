@@ -23,8 +23,11 @@ function [f_positive] = TranslationWorkspace_V2(phi_0,a,b, f_min,f_max, f_ref, w
 % Created by Magnus Grøterud
 
 % Extract Lengths of the Base
-x_dim = norm(a(:,3) - a(:,2));
-y_dim = norm(a(:,2) - a(:,1));
+% x_dim = norm(a(:,3) - a(:,2));
+% y_dim = norm(a(:,2) - a(:,1));
+
+x_dim = 1.4;
+y_dim = 0.8;
 
 
 % Grid of the "Base Workspace"
@@ -66,22 +69,23 @@ end
 [row, col] = find(f_positive == 1);
 
 % Plot the points
-scatter(x_grid(row), y_grid(col), 'filled', 'MarkerFaceColor', color); % 'filled' option fills the markers
-grid on;
+scatter(x_grid(row), y_grid(col), 'filled', 'MarkerFaceColor', color,'LineWidth',1); % 'filled' option fills the markers
+% grid on;
 % Set axis labels and title
-xlabel('X-axis');
-ylabel('Y-axis');
-title('Translation Workspace, with $$\phi _0 = $$ ' + string(rad2deg(phi_0)) + ' degrees, $$w_{ref} = [$$'+ string(w(1)) + ',' + string(w(2)) + ',' + string(w(3)) + ']', 'Interpreter','latex');
+% xlabel('X-axis');
+% ylabel('Y-axis');
+% title('Translation Workspace, with $$\phi _0 = $$ ' + string(rad2deg(phi_0)) + ' degrees, $$w_{ref} = [$$'+ string(w(1)) + ',' + string(w(2)) + ',' + string(w(3)) + ']', 'Interpreter','latex');
 
 % Plotting the shape created by points in matrix 'b'
 hold on; % Keep the current plot
 plot([b(1,:), b(1,1)], [b(2,:), b(2,1)], 'k-o', 'LineWidth', 2); % Plot shape as a closed loop
+rectangle('Position',[-x_dim/2 -y_dim/2 x_dim y_dim],'LineWidth',5)
 hold off;
 
 
 
 % Optionally, set axis limits based on the matrix size
-axis([-0.5, 0.5, -0.5, 0.5]);
+% axis([-0.5, 0.5, -0.5, 0.5]);
 
 % % Displaying the matrix where 1s are plotted and adjusting the axes
 % imagesc(y_grid,x_grid, f_positive);
